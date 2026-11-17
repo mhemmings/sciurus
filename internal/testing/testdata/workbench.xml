@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A self-authored GRT fixture containing only the fields used by layout import. -->
+<data>
+  <value id="diagram" struct-name="workbench.physical.Diagram">
+    <value key="x">125</value>
+    <value key="y">75</value>
+    <value key="zoom">0.8</value>
+    <value id="root-layer" key="rootLayer" struct-name="workbench.physical.Layer">
+      <link key="owner">diagram</link>
+      <value key="name">Canvas</value>
+      <value key="left">20</value>
+      <value key="top">30</value>
+    </value>
+    <value id="layer-planning" struct-name="workbench.physical.Layer">
+      <link key="owner">diagram</link>
+      <value key="name">Planning</value>
+      <value key="left">200</value>
+      <value key="top">300</value>
+      <value key="width">900</value>
+      <value key="height">600</value>
+      <value key="color">#34a8b0</value>
+    </value>
+    <value id="figure-task" struct-name="workbench.physical.TableFigure">
+      <link key="owner">diagram</link>
+      <link key="table">table-task</link>
+      <link key="layer">layer-planning</link>
+      <value key="left">380</value>
+      <value key="top">80</value>
+      <value key="width">340</value>
+    </value>
+    <value id="figure-label" struct-name="workbench.physical.TableFigure">
+      <link key="owner">diagram</link>
+      <link key="table">table-label</link>
+      <link key="layer">root-layer</link>
+      <value key="left">840</value>
+      <value key="top">70</value>
+      <value key="width">280</value>
+    </value>
+    <value id="figure-project" struct-name="workbench.physical.TableFigure">
+      <link key="owner">diagram</link>
+      <link key="table">table-project</link>
+      <link key="layer">layer-planning</link>
+      <value key="left">30</value>
+      <value key="top">40</value>
+      <value key="width">300</value>
+    </value>
+    <value id="figure-archive" struct-name="workbench.physical.TableFigure">
+      <link key="owner">diagram</link>
+      <link key="table">table-archive</link>
+      <link key="layer">root-layer</link>
+      <value key="left">1200</value>
+      <value key="top">100</value>
+      <value key="width">280</value>
+    </value>
+  </value>
+  <value id="table-label" struct-name="db.mysql.Table">
+    <value key="name">label</value>
+  </value>
+  <value id="table-project" struct-name="db.mysql.Table">
+    <value key="name">project</value>
+  </value>
+  <value id="table-task" struct-name="db.mysql.Table">
+    <value key="name">task</value>
+    <value id="graphical-key" struct-name="db.mysql.ForeignKey">
+      <value key="name">task_label_graphical_only</value>
+      <link key="owner">table-task</link>
+      <link key="referencedTable">table-label</link>
+      <value key="deleteRule">CASCADE</value>
+    </value>
+  </value>
+  <value id="table-archive" struct-name="db.mysql.Table">
+    <value key="name">archive</value>
+  </value>
+</data>

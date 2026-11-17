@@ -1,0 +1,2826 @@
+{
+  "version": 1,
+  "name": "Project Management",
+  "charset": "utf8mb4",
+  "collation": "utf8mb4_0900_ai_ci",
+  "tables": [
+    {
+      "id": "member",
+      "name": "member",
+      "engine": "InnoDB",
+      "position": {
+        "x": 2312,
+        "y": 152
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "id",
+          "name": "id",
+          "type": "BIGINT unsigned",
+          "nullable": false,
+          "autoIncrement": true
+        },
+        {
+          "id": "email",
+          "name": "email",
+          "type": "VARCHAR(254)",
+          "nullable": false
+        },
+        {
+          "id": "display_name",
+          "name": "display_name",
+          "type": "VARCHAR(120)",
+          "nullable": false
+        },
+        {
+          "id": "timezone",
+          "name": "timezone",
+          "type": "VARCHAR(64)",
+          "nullable": false,
+          "default": "'UTC'"
+        },
+        {
+          "id": "created_at",
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "default": "current_timestamp()"
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        {
+          "id": "member_email",
+          "name": "member_email",
+          "kind": "UNIQUE",
+          "columns": [
+            {
+              "column": "email"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [],
+      "groupId": "people"
+    },
+    {
+      "id": "workspace",
+      "name": "workspace",
+      "engine": "InnoDB",
+      "position": {
+        "x": 2696,
+        "y": 152
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "id",
+          "name": "id",
+          "type": "BIGINT unsigned",
+          "nullable": false,
+          "autoIncrement": true
+        },
+        {
+          "id": "slug",
+          "name": "slug",
+          "type": "VARCHAR(64)",
+          "nullable": false
+        },
+        {
+          "id": "name",
+          "name": "name",
+          "type": "VARCHAR(160)",
+          "nullable": false
+        },
+        {
+          "id": "settings",
+          "name": "settings",
+          "type": "JSON",
+          "nullable": true
+        },
+        {
+          "id": "created_at",
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": false,
+          "default": "current_timestamp()"
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        {
+          "id": "workspace_slug",
+          "name": "workspace_slug",
+          "kind": "UNIQUE",
+          "columns": [
+            {
+              "column": "slug"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [],
+      "groupId": "people"
+    },
+    {
+      "id": "workspace_member",
+      "name": "workspace_member",
+      "engine": "InnoDB",
+      "position": {
+        "x": 2312,
+        "y": 414
+      },
+      "width": 344,
+      "columns": [
+        {
+          "id": "workspace_id",
+          "name": "workspace_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "member_id",
+          "name": "member_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "role",
+          "name": "role",
+          "type": "ENUM('owner', 'admin', 'member')",
+          "nullable": false,
+          "default": "'member'"
+        },
+        {
+          "id": "joined_at",
+          "name": "joined_at",
+          "type": "DATETIME",
+          "nullable": false,
+          "default": "current_timestamp()"
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "workspace_id"
+            },
+            {
+              "column": "member_id"
+            }
+          ]
+        },
+        {
+          "id": "workspace_member_member",
+          "name": "workspace_member_member",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "member_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "workspace_member_workspace_fk",
+          "name": "workspace_member_workspace_fk",
+          "columns": [
+            "workspace_id"
+          ],
+          "referencedTable": "workspace",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "id": "workspace_member_member_fk",
+          "name": "workspace_member_member_fk",
+          "columns": [
+            "member_id"
+          ],
+          "referencedTable": "member",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ],
+      "groupId": "people"
+    },
+    {
+      "id": "team",
+      "name": "team",
+      "engine": "InnoDB",
+      "position": {
+        "x": 2736,
+        "y": 414
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "id",
+          "name": "id",
+          "type": "BIGINT unsigned",
+          "nullable": false,
+          "autoIncrement": true
+        },
+        {
+          "id": "workspace_id",
+          "name": "workspace_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "name",
+          "name": "name",
+          "type": "VARCHAR(120)",
+          "nullable": false
+        },
+        {
+          "id": "description",
+          "name": "description",
+          "type": "TEXT",
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        {
+          "id": "team_workspace_name",
+          "name": "team_workspace_name",
+          "kind": "UNIQUE",
+          "columns": [
+            {
+              "column": "workspace_id"
+            },
+            {
+              "column": "name"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "team_workspace_fk",
+          "name": "team_workspace_fk",
+          "columns": [
+            "workspace_id"
+          ],
+          "referencedTable": "workspace",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ],
+      "groupId": "people"
+    },
+    {
+      "id": "team_member",
+      "name": "team_member",
+      "engine": "InnoDB",
+      "position": {
+        "x": 2312,
+        "y": 648
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "team_id",
+          "name": "team_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "member_id",
+          "name": "member_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "joined_on",
+          "name": "joined_on",
+          "type": "DATE",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "team_id"
+            },
+            {
+              "column": "member_id"
+            }
+          ]
+        },
+        {
+          "id": "team_member_member",
+          "name": "team_member_member",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "member_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "team_member_team_fk",
+          "name": "team_member_team_fk",
+          "columns": [
+            "team_id"
+          ],
+          "referencedTable": "team",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "id": "team_member_member_fk",
+          "name": "team_member_member_fk",
+          "columns": [
+            "member_id"
+          ],
+          "referencedTable": "member",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ],
+      "groupId": "people"
+    },
+    {
+      "id": "project",
+      "name": "project",
+      "engine": "InnoDB",
+      "position": {
+        "x": 1392,
+        "y": 152
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "id",
+          "name": "id",
+          "type": "BIGINT unsigned",
+          "nullable": false,
+          "autoIncrement": true
+        },
+        {
+          "id": "workspace_id",
+          "name": "workspace_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "code",
+          "name": "code",
+          "type": "CHAR(12)",
+          "nullable": false
+        },
+        {
+          "id": "name",
+          "name": "name",
+          "type": "VARCHAR(180)",
+          "nullable": false
+        },
+        {
+          "id": "description",
+          "name": "description",
+          "type": "TEXT",
+          "nullable": true
+        },
+        {
+          "id": "start_date",
+          "name": "start_date",
+          "type": "DATE",
+          "nullable": true
+        },
+        {
+          "id": "target_date",
+          "name": "target_date",
+          "type": "DATE",
+          "nullable": true
+        },
+        {
+          "id": "archived",
+          "name": "archived",
+          "type": "TINYINT(1)",
+          "nullable": false,
+          "default": "0"
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        {
+          "id": "project_workspace_code",
+          "name": "project_workspace_code",
+          "kind": "UNIQUE",
+          "columns": [
+            {
+              "column": "workspace_id"
+            },
+            {
+              "column": "code"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "project_workspace_fk",
+          "name": "project_workspace_fk",
+          "columns": [
+            "workspace_id"
+          ],
+          "referencedTable": "workspace",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ],
+      "groupId": "planning",
+      "checks": [
+        {
+          "name": "project_date_order",
+          "expression": "target_date is null or start_date is null or target_date >= start_date",
+          "enforced": true
+        }
+      ]
+    },
+    {
+      "id": "project_member",
+      "name": "project_member",
+      "engine": "InnoDB",
+      "position": {
+        "x": 1392,
+        "y": 760
+      },
+      "width": 328,
+      "columns": [
+        {
+          "id": "project_id",
+          "name": "project_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "member_id",
+          "name": "member_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "role",
+          "name": "role",
+          "type": "ENUM('owner', 'editor', 'viewer')",
+          "nullable": false,
+          "default": "'editor'"
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "project_id"
+            },
+            {
+              "column": "member_id"
+            }
+          ]
+        },
+        {
+          "id": "project_member_member",
+          "name": "project_member_member",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "member_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "project_member_project_fk",
+          "name": "project_member_project_fk",
+          "columns": [
+            "project_id"
+          ],
+          "referencedTable": "project",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "id": "project_member_member_fk",
+          "name": "project_member_member_fk",
+          "columns": [
+            "member_id"
+          ],
+          "referencedTable": "member",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ],
+      "groupId": "planning"
+    },
+    {
+      "id": "milestone",
+      "name": "milestone",
+      "engine": "InnoDB",
+      "position": {
+        "x": 1776,
+        "y": 152
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "id",
+          "name": "id",
+          "type": "BIGINT unsigned",
+          "nullable": false,
+          "autoIncrement": true
+        },
+        {
+          "id": "project_id",
+          "name": "project_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "name",
+          "name": "name",
+          "type": "VARCHAR(180)",
+          "nullable": false
+        },
+        {
+          "id": "due_date",
+          "name": "due_date",
+          "type": "DATE",
+          "nullable": true
+        },
+        {
+          "id": "completed_at",
+          "name": "completed_at",
+          "type": "DATETIME",
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        {
+          "id": "milestone_project",
+          "name": "milestone_project",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "project_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "milestone_project_fk",
+          "name": "milestone_project_fk",
+          "columns": [
+            "project_id"
+          ],
+          "referencedTable": "project",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ],
+      "groupId": "planning"
+    },
+    {
+      "id": "project_status",
+      "name": "project_status",
+      "engine": "InnoDB",
+      "position": {
+        "x": 1392,
+        "y": 498
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "project_id",
+          "name": "project_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "code",
+          "name": "code",
+          "type": "VARCHAR(32)",
+          "nullable": false
+        },
+        {
+          "id": "name",
+          "name": "name",
+          "type": "VARCHAR(80)",
+          "nullable": false
+        },
+        {
+          "id": "position",
+          "name": "position",
+          "type": "SMALLINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "is_complete",
+          "name": "is_complete",
+          "type": "TINYINT(1)",
+          "nullable": false,
+          "default": "0"
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "project_id"
+            },
+            {
+              "column": "code"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "project_status_project_fk",
+          "name": "project_status_project_fk",
+          "columns": [
+            "project_id"
+          ],
+          "referencedTable": "project",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ],
+      "groupId": "planning"
+    },
+    {
+      "id": "label",
+      "name": "label",
+      "engine": "InnoDB",
+      "position": {
+        "x": 1776,
+        "y": 498
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "id",
+          "name": "id",
+          "type": "BIGINT unsigned",
+          "nullable": false,
+          "autoIncrement": true
+        },
+        {
+          "id": "workspace_id",
+          "name": "workspace_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "name",
+          "name": "name",
+          "type": "VARCHAR(80)",
+          "nullable": false
+        },
+        {
+          "id": "color",
+          "name": "color",
+          "type": "CHAR(7)",
+          "nullable": false,
+          "default": "'#64748b'"
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        {
+          "id": "label_workspace_name",
+          "name": "label_workspace_name",
+          "kind": "UNIQUE",
+          "columns": [
+            {
+              "column": "workspace_id"
+            },
+            {
+              "column": "name"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "label_workspace_fk",
+          "name": "label_workspace_fk",
+          "columns": [
+            "workspace_id"
+          ],
+          "referencedTable": "workspace",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ],
+      "groupId": "planning"
+    },
+    {
+      "id": "project_label",
+      "name": "project_label",
+      "engine": "InnoDB",
+      "position": {
+        "x": 1800,
+        "y": 760
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "project_id",
+          "name": "project_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "label_id",
+          "name": "label_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "project_id"
+            },
+            {
+              "column": "label_id"
+            }
+          ]
+        },
+        {
+          "id": "project_label_label",
+          "name": "project_label_label",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "label_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "project_label_project_fk",
+          "name": "project_label_project_fk",
+          "columns": [
+            "project_id"
+          ],
+          "referencedTable": "project",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "id": "project_label_label_fk",
+          "name": "project_label_label_fk",
+          "columns": [
+            "label_id"
+          ],
+          "referencedTable": "label",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ],
+      "groupId": "planning"
+    },
+    {
+      "id": "task",
+      "name": "task",
+      "engine": "InnoDB",
+      "position": {
+        "x": 112,
+        "y": 152
+      },
+      "width": 360,
+      "columns": [
+        {
+          "id": "id",
+          "name": "id",
+          "type": "BIGINT unsigned",
+          "nullable": false,
+          "autoIncrement": true
+        },
+        {
+          "id": "project_id",
+          "name": "project_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "status_code",
+          "name": "status_code",
+          "type": "VARCHAR(32)",
+          "nullable": false
+        },
+        {
+          "id": "title",
+          "name": "title",
+          "type": "VARCHAR(240)",
+          "nullable": false
+        },
+        {
+          "id": "description",
+          "name": "description",
+          "type": "MEDIUMTEXT",
+          "nullable": true
+        },
+        {
+          "id": "parent_task_id",
+          "name": "parent_task_id",
+          "type": "BIGINT unsigned",
+          "nullable": true
+        },
+        {
+          "id": "milestone_id",
+          "name": "milestone_id",
+          "type": "BIGINT unsigned",
+          "nullable": true
+        },
+        {
+          "id": "priority",
+          "name": "priority",
+          "type": "ENUM('low', 'normal', 'high', 'urgent')",
+          "nullable": false,
+          "default": "'normal'"
+        },
+        {
+          "id": "estimate_hours",
+          "name": "estimate_hours",
+          "type": "DECIMAL(7,2)",
+          "nullable": true
+        },
+        {
+          "id": "due_at",
+          "name": "due_at",
+          "type": "DATETIME",
+          "nullable": true
+        },
+        {
+          "id": "created_at",
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": false,
+          "default": "current_timestamp()"
+        },
+        {
+          "id": "updated_at",
+          "name": "updated_at",
+          "type": "DATETIME",
+          "nullable": false,
+          "default": "current_timestamp()",
+          "onUpdate": "current_timestamp()"
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        {
+          "id": "task_project_id",
+          "name": "task_project_id",
+          "kind": "UNIQUE",
+          "columns": [
+            {
+              "column": "project_id"
+            },
+            {
+              "column": "id"
+            }
+          ]
+        },
+        {
+          "id": "task_project_status",
+          "name": "task_project_status",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "project_id"
+            },
+            {
+              "column": "status_code"
+            }
+          ]
+        },
+        {
+          "id": "task_parent",
+          "name": "task_parent",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "parent_task_id"
+            }
+          ]
+        },
+        {
+          "id": "task_milestone",
+          "name": "task_milestone",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "milestone_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "task_project_fk",
+          "name": "task_project_fk",
+          "columns": [
+            "project_id"
+          ],
+          "referencedTable": "project",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "id": "task_status_fk",
+          "name": "task_status_fk",
+          "columns": [
+            "project_id",
+            "status_code"
+          ],
+          "referencedTable": "project_status",
+          "referencedColumns": [
+            "project_id",
+            "code"
+          ],
+          "onDelete": "RESTRICT"
+        },
+        {
+          "id": "task_parent_fk",
+          "name": "task_parent_fk",
+          "columns": [
+            "parent_task_id"
+          ],
+          "referencedTable": "task",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "SET NULL"
+        },
+        {
+          "id": "task_milestone_fk",
+          "name": "task_milestone_fk",
+          "columns": [
+            "milestone_id"
+          ],
+          "referencedTable": "milestone",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "SET NULL"
+        }
+      ],
+      "groupId": "tasks",
+      "checks": [
+        {
+          "name": "task_estimate_nonnegative",
+          "expression": "estimate_hours >= 0",
+          "enforced": true
+        }
+      ]
+    },
+    {
+      "id": "task_dependency",
+      "name": "task_dependency",
+      "engine": "InnoDB",
+      "position": {
+        "x": 112,
+        "y": 844
+      },
+      "width": 336,
+      "columns": [
+        {
+          "id": "task_id",
+          "name": "task_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "depends_on_task_id",
+          "name": "depends_on_task_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "task_id"
+            },
+            {
+              "column": "depends_on_task_id"
+            }
+          ]
+        },
+        {
+          "id": "task_dependency_dependency",
+          "name": "task_dependency_dependency",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "depends_on_task_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "task_dependency_task_fk",
+          "name": "task_dependency_task_fk",
+          "columns": [
+            "task_id"
+          ],
+          "referencedTable": "task",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "id": "task_dependency_dependency_fk",
+          "name": "task_dependency_dependency_fk",
+          "columns": [
+            "depends_on_task_id"
+          ],
+          "referencedTable": "task",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ],
+      "groupId": "tasks"
+    },
+    {
+      "id": "task_assignee",
+      "name": "task_assignee",
+      "engine": "InnoDB",
+      "position": {
+        "x": 496,
+        "y": 610
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "task_id",
+          "name": "task_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "member_id",
+          "name": "member_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "assigned_at",
+          "name": "assigned_at",
+          "type": "DATETIME",
+          "nullable": false,
+          "default": "current_timestamp()"
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "task_id"
+            },
+            {
+              "column": "member_id"
+            }
+          ]
+        },
+        {
+          "id": "task_assignee_member",
+          "name": "task_assignee_member",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "member_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "task_assignee_task_fk",
+          "name": "task_assignee_task_fk",
+          "columns": [
+            "task_id"
+          ],
+          "referencedTable": "task",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "id": "task_assignee_member_fk",
+          "name": "task_assignee_member_fk",
+          "columns": [
+            "member_id"
+          ],
+          "referencedTable": "member",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ],
+      "groupId": "tasks"
+    },
+    {
+      "id": "task_label",
+      "name": "task_label",
+      "engine": "InnoDB",
+      "position": {
+        "x": 880,
+        "y": 610
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "project_id",
+          "name": "project_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "task_id",
+          "name": "task_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "label_id",
+          "name": "label_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "project_id"
+            },
+            {
+              "column": "task_id"
+            },
+            {
+              "column": "label_id"
+            }
+          ]
+        },
+        {
+          "id": "task_label_project_label",
+          "name": "task_label_project_label",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "project_id"
+            },
+            {
+              "column": "label_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "task_label_task_fk",
+          "name": "task_label_task_fk",
+          "columns": [
+            "project_id",
+            "task_id"
+          ],
+          "referencedTable": "task",
+          "referencedColumns": [
+            "project_id",
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "id": "task_label_label_fk",
+          "name": "task_label_label_fk",
+          "columns": [
+            "project_id",
+            "label_id"
+          ],
+          "referencedTable": "project_label",
+          "referencedColumns": [
+            "project_id",
+            "label_id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ],
+      "groupId": "tasks"
+    },
+    {
+      "id": "task_checklist",
+      "name": "task_checklist",
+      "engine": "InnoDB",
+      "position": {
+        "x": 112,
+        "y": 610
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "task_id",
+          "name": "task_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "id",
+          "name": "id",
+          "type": "INT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "title",
+          "name": "title",
+          "type": "VARCHAR(160)",
+          "nullable": false
+        },
+        {
+          "id": "position",
+          "name": "position",
+          "type": "SMALLINT unsigned",
+          "nullable": false,
+          "default": "0"
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "task_id"
+            },
+            {
+              "column": "id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "task_checklist_task_fk",
+          "name": "task_checklist_task_fk",
+          "columns": [
+            "task_id"
+          ],
+          "referencedTable": "task",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ],
+      "groupId": "tasks"
+    },
+    {
+      "id": "checklist_item",
+      "name": "checklist_item",
+      "engine": "InnoDB",
+      "position": {
+        "x": 552,
+        "y": 152
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "task_id",
+          "name": "task_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "checklist_id",
+          "name": "checklist_id",
+          "type": "INT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "item_number",
+          "name": "item_number",
+          "type": "INT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "title",
+          "name": "title",
+          "type": "VARCHAR(240)",
+          "nullable": false
+        },
+        {
+          "id": "completed",
+          "name": "completed",
+          "type": "TINYINT(1)",
+          "nullable": false,
+          "default": "0"
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "task_id"
+            },
+            {
+              "column": "checklist_id"
+            },
+            {
+              "column": "item_number"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "checklist_item_checklist_fk",
+          "name": "checklist_item_checklist_fk",
+          "columns": [
+            "task_id",
+            "checklist_id"
+          ],
+          "referencedTable": "task_checklist",
+          "referencedColumns": [
+            "task_id",
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ],
+      "groupId": "tasks"
+    },
+    {
+      "id": "comment",
+      "name": "comment",
+      "engine": "InnoDB",
+      "position": {
+        "x": 1808,
+        "y": 1190
+      },
+      "width": 328,
+      "columns": [
+        {
+          "id": "id",
+          "name": "id",
+          "type": "BIGINT unsigned",
+          "nullable": false,
+          "autoIncrement": true
+        },
+        {
+          "id": "task_id",
+          "name": "task_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "author_id",
+          "name": "author_id",
+          "type": "BIGINT unsigned",
+          "nullable": true
+        },
+        {
+          "id": "parent_comment_id",
+          "name": "parent_comment_id",
+          "type": "BIGINT unsigned",
+          "nullable": true
+        },
+        {
+          "id": "body",
+          "name": "body",
+          "type": "TEXT",
+          "nullable": false
+        },
+        {
+          "id": "created_at",
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": false,
+          "default": "current_timestamp()"
+        },
+        {
+          "id": "edited_at",
+          "name": "edited_at",
+          "type": "DATETIME",
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        {
+          "id": "comment_task",
+          "name": "comment_task",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "task_id"
+            }
+          ]
+        },
+        {
+          "id": "comment_author",
+          "name": "comment_author",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "author_id"
+            }
+          ]
+        },
+        {
+          "id": "comment_parent",
+          "name": "comment_parent",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "parent_comment_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "comment_task_fk",
+          "name": "comment_task_fk",
+          "columns": [
+            "task_id"
+          ],
+          "referencedTable": "task",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "id": "comment_author_fk",
+          "name": "comment_author_fk",
+          "columns": [
+            "author_id"
+          ],
+          "referencedTable": "member",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "SET NULL"
+        },
+        {
+          "id": "comment_parent_fk",
+          "name": "comment_parent_fk",
+          "columns": [
+            "parent_comment_id"
+          ],
+          "referencedTable": "comment",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "SET NULL"
+        }
+      ],
+      "groupId": "collaboration"
+    },
+    {
+      "id": "comment_reaction",
+      "name": "comment_reaction",
+      "engine": "InnoDB",
+      "position": {
+        "x": 1816,
+        "y": 1592
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "comment_id",
+          "name": "comment_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "member_id",
+          "name": "member_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "reaction",
+          "name": "reaction",
+          "type": "VARCHAR(32)",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "comment_id"
+            },
+            {
+              "column": "member_id"
+            },
+            {
+              "column": "reaction"
+            }
+          ]
+        },
+        {
+          "id": "comment_reaction_member",
+          "name": "comment_reaction_member",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "member_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "comment_reaction_comment_fk",
+          "name": "comment_reaction_comment_fk",
+          "columns": [
+            "comment_id"
+          ],
+          "referencedTable": "comment",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "id": "comment_reaction_member_fk",
+          "name": "comment_reaction_member_fk",
+          "columns": [
+            "member_id"
+          ],
+          "referencedTable": "member",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ],
+      "groupId": "collaboration"
+    },
+    {
+      "id": "document",
+      "name": "document",
+      "engine": "InnoDB",
+      "position": {
+        "x": 2216,
+        "y": 1190
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "id",
+          "name": "id",
+          "type": "BIGINT unsigned",
+          "nullable": false,
+          "autoIncrement": true
+        },
+        {
+          "id": "project_id",
+          "name": "project_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "title",
+          "name": "title",
+          "type": "VARCHAR(240)",
+          "nullable": false
+        },
+        {
+          "id": "body",
+          "name": "body",
+          "type": "LONGTEXT",
+          "nullable": false
+        },
+        {
+          "id": "created_by",
+          "name": "created_by",
+          "type": "BIGINT unsigned",
+          "nullable": true
+        },
+        {
+          "id": "created_at",
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": false,
+          "default": "current_timestamp()"
+        },
+        {
+          "id": "updated_at",
+          "name": "updated_at",
+          "type": "DATETIME",
+          "nullable": false,
+          "default": "current_timestamp()",
+          "onUpdate": "current_timestamp()"
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        {
+          "id": "document_project",
+          "name": "document_project",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "project_id"
+            }
+          ]
+        },
+        {
+          "id": "document_author",
+          "name": "document_author",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "created_by"
+            }
+          ]
+        },
+        {
+          "id": "document_search",
+          "name": "document_search",
+          "kind": "FULLTEXT",
+          "columns": [
+            {
+              "column": "title"
+            },
+            {
+              "column": "body"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "document_project_fk",
+          "name": "document_project_fk",
+          "columns": [
+            "project_id"
+          ],
+          "referencedTable": "project",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "id": "document_author_fk",
+          "name": "document_author_fk",
+          "columns": [
+            "created_by"
+          ],
+          "referencedTable": "member",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "SET NULL"
+        }
+      ],
+      "groupId": "collaboration"
+    },
+    {
+      "id": "document_revision",
+      "name": "document_revision",
+      "engine": "InnoDB",
+      "position": {
+        "x": 1424,
+        "y": 1592
+      },
+      "width": 312,
+      "columns": [
+        {
+          "id": "document_id",
+          "name": "document_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "revision_number",
+          "name": "revision_number",
+          "type": "INT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "body",
+          "name": "body",
+          "type": "LONGTEXT",
+          "nullable": false
+        },
+        {
+          "id": "author_id",
+          "name": "author_id",
+          "type": "BIGINT unsigned",
+          "nullable": true
+        },
+        {
+          "id": "created_at",
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": false,
+          "default": "current_timestamp()"
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "document_id"
+            },
+            {
+              "column": "revision_number"
+            }
+          ]
+        },
+        {
+          "id": "document_revision_author",
+          "name": "document_revision_author",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "author_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "document_revision_document_fk",
+          "name": "document_revision_document_fk",
+          "columns": [
+            "document_id"
+          ],
+          "referencedTable": "document",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "id": "document_revision_author_fk",
+          "name": "document_revision_author_fk",
+          "columns": [
+            "author_id"
+          ],
+          "referencedTable": "member",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "SET NULL"
+        }
+      ],
+      "groupId": "collaboration"
+    },
+    {
+      "id": "attachment",
+      "name": "attachment",
+      "engine": "InnoDB",
+      "position": {
+        "x": 1424,
+        "y": 1190
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "id",
+          "name": "id",
+          "type": "BIGINT unsigned",
+          "nullable": false,
+          "autoIncrement": true
+        },
+        {
+          "id": "task_id",
+          "name": "task_id",
+          "type": "BIGINT unsigned",
+          "nullable": true
+        },
+        {
+          "id": "document_id",
+          "name": "document_id",
+          "type": "BIGINT unsigned",
+          "nullable": true
+        },
+        {
+          "id": "uploaded_by",
+          "name": "uploaded_by",
+          "type": "BIGINT unsigned",
+          "nullable": true
+        },
+        {
+          "id": "file_name",
+          "name": "file_name",
+          "type": "VARCHAR(255)",
+          "nullable": false
+        },
+        {
+          "id": "mime_type",
+          "name": "mime_type",
+          "type": "VARCHAR(127)",
+          "nullable": false
+        },
+        {
+          "id": "size_bytes",
+          "name": "size_bytes",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "checksum",
+          "name": "checksum",
+          "type": "BINARY(32)",
+          "nullable": false
+        },
+        {
+          "id": "storage_key",
+          "name": "storage_key",
+          "type": "VARCHAR(1024)",
+          "nullable": false
+        },
+        {
+          "id": "created_at",
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": false,
+          "default": "current_timestamp()"
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        {
+          "id": "attachment_task",
+          "name": "attachment_task",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "task_id"
+            }
+          ]
+        },
+        {
+          "id": "attachment_document",
+          "name": "attachment_document",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "document_id"
+            }
+          ]
+        },
+        {
+          "id": "attachment_uploader",
+          "name": "attachment_uploader",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "uploaded_by"
+            }
+          ]
+        },
+        {
+          "id": "attachment_storage",
+          "name": "attachment_storage",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "storage_key",
+              "length": 191
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "attachment_task_fk",
+          "name": "attachment_task_fk",
+          "columns": [
+            "task_id"
+          ],
+          "referencedTable": "task",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "id": "attachment_document_fk",
+          "name": "attachment_document_fk",
+          "columns": [
+            "document_id"
+          ],
+          "referencedTable": "document",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "id": "attachment_uploader_fk",
+          "name": "attachment_uploader_fk",
+          "columns": [
+            "uploaded_by"
+          ],
+          "referencedTable": "member",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "SET NULL"
+        }
+      ],
+      "groupId": "collaboration"
+    },
+    {
+      "id": "time_entry",
+      "name": "time_entry",
+      "engine": "InnoDB",
+      "position": {
+        "x": 112,
+        "y": 1536
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "id",
+          "name": "id",
+          "type": "BIGINT unsigned",
+          "nullable": false,
+          "autoIncrement": true
+        },
+        {
+          "id": "task_id",
+          "name": "task_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "member_id",
+          "name": "member_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "started_at",
+          "name": "started_at",
+          "type": "DATETIME",
+          "nullable": false
+        },
+        {
+          "id": "ended_at",
+          "name": "ended_at",
+          "type": "DATETIME",
+          "nullable": true
+        },
+        {
+          "id": "notes",
+          "name": "notes",
+          "type": "TEXT",
+          "nullable": true
+        },
+        {
+          "id": "billable",
+          "name": "billable",
+          "type": "TINYINT(1)",
+          "nullable": false,
+          "default": "0"
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        {
+          "id": "time_entry_task",
+          "name": "time_entry_task",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "task_id"
+            }
+          ]
+        },
+        {
+          "id": "time_entry_member",
+          "name": "time_entry_member",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "member_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "time_entry_task_fk",
+          "name": "time_entry_task_fk",
+          "columns": [
+            "task_id"
+          ],
+          "referencedTable": "task",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "id": "time_entry_member_fk",
+          "name": "time_entry_member_fk",
+          "columns": [
+            "member_id"
+          ],
+          "referencedTable": "member",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ],
+      "groupId": "activity",
+      "checks": [
+        {
+          "name": "time_entry_time_order",
+          "expression": "ended_at is null or ended_at >= started_at",
+          "enforced": true
+        }
+      ]
+    },
+    {
+      "id": "timer",
+      "name": "timer",
+      "engine": "InnoDB",
+      "position": {
+        "x": 880,
+        "y": 1536
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "member_id",
+          "name": "member_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "task_id",
+          "name": "task_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "started_at",
+          "name": "started_at",
+          "type": "DATETIME",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "member_id"
+            }
+          ]
+        },
+        {
+          "id": "timer_task",
+          "name": "timer_task",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "task_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "timer_member_fk",
+          "name": "timer_member_fk",
+          "columns": [
+            "member_id"
+          ],
+          "referencedTable": "member",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "id": "timer_task_fk",
+          "name": "timer_task_fk",
+          "columns": [
+            "task_id"
+          ],
+          "referencedTable": "task",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ],
+      "groupId": "activity"
+    },
+    {
+      "id": "activity",
+      "name": "activity",
+      "engine": "InnoDB",
+      "position": {
+        "x": 912,
+        "y": 1190
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "id",
+          "name": "id",
+          "type": "BIGINT unsigned",
+          "nullable": false,
+          "autoIncrement": true
+        },
+        {
+          "id": "workspace_id",
+          "name": "workspace_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "actor_id",
+          "name": "actor_id",
+          "type": "BIGINT unsigned",
+          "nullable": true
+        },
+        {
+          "id": "task_id",
+          "name": "task_id",
+          "type": "BIGINT unsigned",
+          "nullable": true
+        },
+        {
+          "id": "event_type",
+          "name": "event_type",
+          "type": "VARCHAR(64)",
+          "nullable": false
+        },
+        {
+          "id": "payload",
+          "name": "payload",
+          "type": "JSON",
+          "nullable": false
+        },
+        {
+          "id": "occurred_at",
+          "name": "occurred_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "default": "current_timestamp()"
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        {
+          "id": "activity_workspace_time",
+          "name": "activity_workspace_time",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "workspace_id"
+            },
+            {
+              "column": "occurred_at",
+              "descending": true
+            }
+          ]
+        },
+        {
+          "id": "activity_actor",
+          "name": "activity_actor",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "actor_id"
+            }
+          ]
+        },
+        {
+          "id": "activity_task",
+          "name": "activity_task",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "task_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "activity_workspace_fk",
+          "name": "activity_workspace_fk",
+          "columns": [
+            "workspace_id"
+          ],
+          "referencedTable": "workspace",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "id": "activity_actor_fk",
+          "name": "activity_actor_fk",
+          "columns": [
+            "actor_id"
+          ],
+          "referencedTable": "member",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "SET NULL"
+        },
+        {
+          "id": "activity_task_fk",
+          "name": "activity_task_fk",
+          "columns": [
+            "task_id"
+          ],
+          "referencedTable": "task",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "SET NULL"
+        }
+      ],
+      "groupId": "activity"
+    },
+    {
+      "id": "notification",
+      "name": "notification",
+      "engine": "InnoDB",
+      "position": {
+        "x": 504,
+        "y": 1190
+      },
+      "width": 328,
+      "columns": [
+        {
+          "id": "id",
+          "name": "id",
+          "type": "BIGINT unsigned",
+          "nullable": false,
+          "autoIncrement": true
+        },
+        {
+          "id": "member_id",
+          "name": "member_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "task_id",
+          "name": "task_id",
+          "type": "BIGINT unsigned",
+          "nullable": true
+        },
+        {
+          "id": "channel",
+          "name": "channel",
+          "type": "ENUM('in_app', 'email')",
+          "nullable": false,
+          "default": "'in_app'"
+        },
+        {
+          "id": "payload",
+          "name": "payload",
+          "type": "JSON",
+          "nullable": false
+        },
+        {
+          "id": "read_at",
+          "name": "read_at",
+          "type": "DATETIME",
+          "nullable": true
+        },
+        {
+          "id": "created_at",
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": false,
+          "default": "current_timestamp()"
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        {
+          "id": "notification_member_read",
+          "name": "notification_member_read",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "member_id"
+            },
+            {
+              "column": "read_at"
+            }
+          ]
+        },
+        {
+          "id": "notification_task",
+          "name": "notification_task",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "task_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "notification_member_fk",
+          "name": "notification_member_fk",
+          "columns": [
+            "member_id"
+          ],
+          "referencedTable": "member",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "id": "notification_task_fk",
+          "name": "notification_task_fk",
+          "columns": [
+            "task_id"
+          ],
+          "referencedTable": "task",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "SET NULL"
+        }
+      ],
+      "groupId": "activity"
+    },
+    {
+      "id": "webhook",
+      "name": "webhook",
+      "engine": "InnoDB",
+      "position": {
+        "x": 496,
+        "y": 1536
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "id",
+          "name": "id",
+          "type": "BIGINT unsigned",
+          "nullable": false,
+          "autoIncrement": true
+        },
+        {
+          "id": "workspace_id",
+          "name": "workspace_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "url",
+          "name": "url",
+          "type": "VARCHAR(2048)",
+          "nullable": false
+        },
+        {
+          "id": "events",
+          "name": "events",
+          "type": "JSON",
+          "nullable": false
+        },
+        {
+          "id": "enabled",
+          "name": "enabled",
+          "type": "TINYINT(1)",
+          "nullable": false,
+          "default": "1"
+        },
+        {
+          "id": "created_at",
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": false,
+          "default": "current_timestamp()"
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        {
+          "id": "webhook_workspace",
+          "name": "webhook_workspace",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "workspace_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "webhook_workspace_fk",
+          "name": "webhook_workspace_fk",
+          "columns": [
+            "workspace_id"
+          ],
+          "referencedTable": "workspace",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ],
+      "groupId": "activity"
+    },
+    {
+      "id": "webhook_delivery",
+      "name": "webhook_delivery",
+      "engine": "InnoDB",
+      "position": {
+        "x": 112,
+        "y": 1190
+      },
+      "width": 312,
+      "columns": [
+        {
+          "id": "id",
+          "name": "id",
+          "type": "BIGINT unsigned",
+          "nullable": false,
+          "autoIncrement": true
+        },
+        {
+          "id": "webhook_id",
+          "name": "webhook_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "event_id",
+          "name": "event_id",
+          "type": "BINARY(16)",
+          "nullable": false
+        },
+        {
+          "id": "attempt",
+          "name": "attempt",
+          "type": "SMALLINT unsigned",
+          "nullable": false,
+          "default": "1"
+        },
+        {
+          "id": "status_code",
+          "name": "status_code",
+          "type": "SMALLINT unsigned",
+          "nullable": true
+        },
+        {
+          "id": "response_body",
+          "name": "response_body",
+          "type": "MEDIUMTEXT",
+          "nullable": true
+        },
+        {
+          "id": "attempted_at",
+          "name": "attempted_at",
+          "type": "DATETIME",
+          "nullable": false,
+          "default": "current_timestamp()"
+        },
+        {
+          "id": "duration_ms",
+          "name": "duration_ms",
+          "type": "INT unsigned",
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        {
+          "id": "webhook_delivery_event_attempt",
+          "name": "webhook_delivery_event_attempt",
+          "kind": "UNIQUE",
+          "columns": [
+            {
+              "column": "webhook_id"
+            },
+            {
+              "column": "event_id"
+            },
+            {
+              "column": "attempt"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "webhook_delivery_webhook_fk",
+          "name": "webhook_delivery_webhook_fk",
+          "columns": [
+            "webhook_id"
+          ],
+          "referencedTable": "webhook",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ],
+      "groupId": "activity"
+    }
+  ],
+  "groups": [
+    {
+      "id": "people",
+      "name": "People",
+      "color": "#3b82f6",
+      "position": {
+        "x": 2280,
+        "y": 80
+      },
+      "width": 792,
+      "height": 726
+    },
+    {
+      "id": "planning",
+      "name": "Planning",
+      "color": "#14b8a6",
+      "position": {
+        "x": 1360,
+        "y": 80
+      },
+      "width": 776,
+      "height": 838
+    },
+    {
+      "id": "tasks",
+      "name": "Tasks",
+      "color": "#8b5cf6",
+      "position": {
+        "x": 80,
+        "y": 80
+      },
+      "width": 1136,
+      "height": 894
+    },
+    {
+      "id": "collaboration",
+      "name": "Collaboration",
+      "color": "#f59e0b",
+      "position": {
+        "x": 1392,
+        "y": 1118
+      },
+      "width": 1160,
+      "height": 688
+    },
+    {
+      "id": "activity",
+      "name": "Activity",
+      "color": "#f43f5e",
+      "position": {
+        "x": 80,
+        "y": 1118
+      },
+      "width": 1168,
+      "height": 688
+    }
+  ],
+  "viewport": {
+    "x": 32,
+    "y": 32,
+    "zoom": 1
+  }
+}

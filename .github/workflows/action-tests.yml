@@ -1,0 +1,45 @@
+name: Test the Sciurus action
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Composite action tests
+    runs-on: ubuntu-26.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7.0.1
+      # The repository root contains the Sciurus composite action in action.yml.
+      # The $/ reference runs it at this workflow's commit and locks its dependencies.
+      - name: Validate a bundled model with the Sciurus action
+        uses: $/
+        with:
+          model: examples/starter.json
+      - name: Exercise action behavior
+        run: bash scripts/test-action.sh
+      - name: Prepare changed schemas
+        run: |
+          printf 'CREATE TABLE task (id INT NOT NULL);\n' > "$RUNNER_TEMP/before.sql"
+          printf 'CREATE TABLE task (id INT NOT NULL, title VARCHAR(80) NULL);\n' > "$RUNNER_TEMP/after.sql"
+      - name: Reject schema changes with the Sciurus action
+        id: difference
+        continue-on-error: true
+        uses: $/
+        with:
+          command: diff
+          before: ${{ runner.temp }}/before.sql
+          after: ${{ runner.temp }}/after.sql
+          fail-on-changes: 'true'
+      - name: Check failed action outputs
+        env:
+          OUTCOME: ${{ steps.difference.outcome }}
+          CHANGED: ${{ steps.difference.outputs.changed }}
+          REPORT: ${{ steps.difference.outputs.report }}
+        run: |
+          test "$OUTCOME" = failure
+          test "$CHANGED" = true
+          test -s "$REPORT"

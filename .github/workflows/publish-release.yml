@@ -1,0 +1,65 @@
+name: Publish a tagged release
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: releases
+  cancel-in-progress: false
+  queue: max
+
+jobs:
+  version:
+    name: Check release tag
+    runs-on: ubuntu-26.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      commit: ${{ steps.version.outputs.commit }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Check the version and tagged commit
+        id: version
+        run: |
+          if [[ ! "$GITHUB_REF_NAME" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo '::error::Release tags must use vMAJOR.MINOR.PATCH.'
+            exit 1
+          fi
+          commit=$(git rev-parse HEAD)
+          test "$(git rev-parse "$GITHUB_REF_NAME^{commit}")" = "$commit"
+          git merge-base --is-ancestor "$commit" origin/main
+          printf 'version=%s\ncommit=%s\n' "$GITHUB_REF_NAME" "$commit" >> "$GITHUB_OUTPUT"
+
+  checks:
+    name: Release checks
+    needs: version
+    uses: ./.github/workflows/ci.yml
+    with:
+      version: ${{ needs.version.outputs.version }}
+
+  publish:
+    name: Publish release
+    needs: [version, checks]
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          pattern: release-${{ needs.version.outputs.version }}-*
+          merge-multiple: true
+          path: ${{ runner.temp }}/release
+      - name: Publish archives, checksums and the action major tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.version.outputs.version }}
+          RELEASE_COMMIT: ${{ needs.version.outputs.commit }}
+        run: bash scripts/publish-release.sh "$VERSION" "$RELEASE_COMMIT" "$RUNNER_TEMP/release"

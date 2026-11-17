@@ -1,0 +1,129 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_call:
+    inputs:
+      version:
+        description: Version embedded in native build artifacts.
+        type: string
+        default: dev
+
+permissions:
+  contents: read
+
+jobs:
+  lockfile:
+    name: Check action dependency lockfile
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Verify locked actions and their upstream commits
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh extension install github/gh-actions-lock --pin v0.4.1
+          gh actions-lock --verify
+
+  go:
+    name: Go and database tests
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-go@v7.1.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      - name: Install Skeema
+        run: go install github.com/skeema/skeema@v1.14.1
+      - name: Check automation scripts and release publication
+        run: |
+          bash -n scripts/*.sh test.sh
+          bash scripts/test-release.sh
+      - name: Run Go checks and required database equivalence tests
+        run: make test-integration
+
+  frontend:
+    name: Frontend and browser tests
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-go@v7.1.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '24'
+          cache: yarn
+          cache-dependency-path: web/yarn.lock
+      - name: Install Yarn Classic
+        run: npm install --global yarn@1.22.22
+      - name: Install frontend dependencies
+        run: yarn --cwd web install --frozen-lockfile
+      - name: Check frontend formatting, types and example layouts
+        run: |
+          yarn --cwd web run check
+          yarn --cwd web examples:check
+      - name: Run frontend and layout unit tests
+        run: yarn --cwd web test
+      - name: Build production frontend
+        run: yarn --cwd web build
+      - name: Check bundled frontend assets are current
+        run: |
+          if [[ -n "$(git status --porcelain -- web/dist)" ]]; then
+            echo '::error::Rebuild and commit web/dist with make frontend.'
+            git status --short -- web/dist
+            git diff --stat -- web/dist
+            exit 1
+          fi
+      - name: Install Chromium
+        run: yarn --cwd web playwright install --with-deps chromium
+      - name: Run browser journeys
+        run: yarn --cwd web test:e2e
+      - name: Upload browser failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: playwright-results
+          path: |
+            web/test-results/
+            web/playwright-report/
+          if-no-files-found: ignore
+
+  action:
+    name: Reusable GitHub Action
+    uses: ./.github/workflows/action-tests.yml
+
+  native-build:
+    name: Native release builds
+    uses: ./.github/workflows/native-builds.yml
+    with:
+      version: ${{ inputs.version || 'dev' }}
+
+  checks:
+    name: CI checks
+    if: always()
+    needs: [lockfile, go, frontend, action, native-build]
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Require every test job to pass
+        env:
+          LOCKFILE_RESULT: ${{ needs.lockfile.result }}
+          GO_RESULT: ${{ needs.go.result }}
+          FRONTEND_RESULT: ${{ needs.frontend.result }}
+          ACTION_RESULT: ${{ needs.action.result }}
+          BUILD_RESULT: ${{ needs.native-build.result }}
+        run: |
+          test "$LOCKFILE_RESULT" = success
+          test "$GO_RESULT" = success
+          test "$FRONTEND_RESULT" = success
+          test "$ACTION_RESULT" = success
+          test "$BUILD_RESULT" = success

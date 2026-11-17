@@ -1,0 +1,34 @@
+{
+  "name": "sciurus-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vue-tsc --noEmit && vite build",
+    "test": "vitest run && node --test scripts/layout-examples.test.ts",
+    "test:e2e": "playwright test",
+    "examples:layout": "node scripts/layout-examples.ts",
+    "examples:check": "node scripts/layout-examples.ts --check",
+    "format": "oxfmt --write src e2e scripts *.ts *.json index.html",
+    "check": "oxfmt --check src e2e scripts *.ts *.json index.html && vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "@vueuse/integrations": "15.0.0",
+    "sortablejs": "1.15.7",
+    "vue": "3.5.42"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@tailwindcss/vite": "4.3.3",
+    "@types/node": "26.5.1",
+    "@types/sortablejs": "1.15.9",
+    "@vitejs/plugin-vue": "6.0.9",
+    "oxfmt": "0.68.0",
+    "tailwindcss": "4.3.3",
+    "typescript": "6.0.3",
+    "vite": "8.3.0",
+    "vitest": "4.1.11",
+    "vue-tsc": "3.3.11"
+  }
+}

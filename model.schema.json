@@ -1,0 +1,605 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sciurus:model:1",
+  "title": "Sciurus ER model, version 1",
+  "description": "One portable MySQL schema and its persisted diagram. This schema validates document shape; sciurus validate additionally checks SQL syntax, names, scoped IDs, reference integrity and supported MySQL semantics. Layout never affects generated SQL.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "name",
+    "tables",
+    "groups",
+    "viewport"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Format version. Unsupported versions must fail; they are never silently interpreted as version 1."
+    },
+    "name": {
+      "$ref": "#/$defs/nonblank",
+      "description": "Human-readable model title. Does not issue CREATE DATABASE or select a database in generated SQL."
+    },
+    "charset": {
+      "$ref": "#/$defs/mysqlWord",
+      "description": "Optional default table character set. Inherited only by tables whose charset and collation are both empty or omitted."
+    },
+    "collation": {
+      "$ref": "#/$defs/mysqlWord",
+      "description": "Optional default table collation. Inherited together with charset only when both table overrides are empty or omitted."
+    },
+    "tables": {
+      "type": "array",
+      "maxItems": 4096,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/table"
+      },
+      "description": "Tables with document-scoped, case-sensitive IDs. Array order is preserved on save; SQL generation sorts tables by SQL name without changing this array."
+    },
+    "groups": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/group"
+      },
+      "description": "Presentation-only layers with document-scoped IDs. Use [] when there are none; membership is stored by each table's groupId."
+    },
+    "viewport": {
+      "$ref": "#/$defs/viewport"
+    }
+  },
+  "$defs": {
+    "nonblank": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "A string containing at least one non-whitespace character."
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "allOf": [
+        {
+          "pattern": "\\S"
+        },
+        {
+          "pattern": "^[^\\u0000\\r\\n\\t]+$(?![\\s\\S])"
+        }
+      ],
+      "description": "Stable, case-sensitive opaque identity; never change it just to rename an SQL object. The Go validator additionally limits IDs to 200 UTF-8 bytes (JSON Schema maxLength counts characters). No NUL, CR, LF or TAB."
+    },
+    "sqlName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "allOf": [
+        {
+          "pattern": "\\S"
+        },
+        {
+          "pattern": "^[^\\u0000\\r\\n\\t]*[^\\u0000\\r\\n\\t ]$(?![\\s\\S])"
+        }
+      ],
+      "description": "A raw MySQL identifier, at most 64 Unicode characters, without NUL/CR/LF/TAB or trailing ASCII space. Do not add backticks: generation quotes and escapes identifiers. Duplicate SQL names are checked case-insensitively."
+    },
+    "mysqlWord": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_]*$(?![\\s\\S])",
+      "description": "An unquoted character-set or collation name. Empty means unspecified. Actual MySQL name support is server-dependent."
+    },
+    "coordinate": {
+      "type": "number",
+      "minimum": -10000000,
+      "maximum": 10000000,
+      "description": "Finite diagram-space coordinate; one unit equals one CSS pixel at zoom 1. Negative and fractional positions are supported."
+    },
+    "point": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "y"
+      ],
+      "properties": {
+        "x": {
+          "$ref": "#/$defs/coordinate"
+        },
+        "y": {
+          "$ref": "#/$defs/coordinate"
+        }
+      }
+    },
+    "width": {
+      "type": "number",
+      "minimum": 80,
+      "maximum": 10000000,
+      "description": "Finite rectangle width in unscaled diagram units."
+    },
+    "viewport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "y",
+        "zoom"
+      ],
+      "description": "Saved view only; does not change SQL or stored table coordinates. Screen position = diagram position * zoom + viewport translation.",
+      "properties": {
+        "x": {
+          "$ref": "#/$defs/coordinate",
+          "description": "Horizontal screen translation in CSS pixels."
+        },
+        "y": {
+          "$ref": "#/$defs/coordinate",
+          "description": "Vertical screen translation in CSS pixels."
+        },
+        "zoom": {
+          "type": "number",
+          "minimum": 0.02,
+          "maximum": 4,
+          "description": "View scale: 1 means 100%."
+        }
+      }
+    },
+    "table": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "position",
+        "width",
+        "columns",
+        "indexes",
+        "foreignKeys"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "$ref": "#/$defs/sqlName"
+        },
+        "engine": {
+          "type": "string",
+          "pattern": "^([Ii][Nn][Nn][Oo][Dd][Bb])?$(?![\\s\\S])",
+          "description": "Only InnoDB is supported. Omitted or empty means InnoDB."
+        },
+        "charset": {
+          "$ref": "#/$defs/mysqlWord",
+          "description": "Explicit table charset. If either table charset or collation is supplied, neither document default is added; MySQL resolves the omitted half of the pair."
+        },
+        "collation": {
+          "$ref": "#/$defs/mysqlWord",
+          "description": "Explicit table collation. A collation-only override determines its own charset in MySQL."
+        },
+        "comment": {
+          "type": "string",
+          "description": "Literal SQL table comment, without SQL quotes."
+        },
+        "position": {
+          "$ref": "#/$defs/point",
+          "description": "Absolute top-left corner in diagram space, even when the table belongs to a group."
+        },
+        "width": {
+          "$ref": "#/$defs/width"
+        },
+        "groupId": {
+          "anyOf": [
+            {
+              "const": ""
+            },
+            {
+              "$ref": "#/$defs/id"
+            }
+          ],
+          "description": "Optional ID of a group in this document. Empty or omitted means ungrouped. This does not make position relative."
+        },
+        "columns": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1017,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/column"
+          },
+          "description": "SQL column order. Column IDs and SQL names must be unique within this table."
+        },
+        "indexes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/index"
+          },
+          "description": "Explicit index order, including PRIMARY. Use [] when empty. Index IDs and SQL names are unique within the table."
+        },
+        "foreignKeys": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/foreignKey"
+          },
+          "description": "Explicit FK order. Use [] when empty. FK IDs and SQL names are unique across the document."
+        },
+        "checks": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/check"
+          },
+          "description": "Optional ordered CHECK constraints. CHECK SQL names are unique across the document in their own constraint namespace."
+        }
+      }
+    },
+    "column": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "type",
+        "nullable"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "$ref": "#/$defs/sqlName"
+        },
+        "type": {
+          "$ref": "#/$defs/nonblank",
+          "description": "MySQL type only, e.g. BIGINT UNSIGNED, VARCHAR(80), DECIMAL(12,2), ENUM('open','closed'). No column name, NULL/DEFAULT/KEY/charset clauses or semicolons. Length, precision and ENUM/SET order are meaningful; the SQL parser validates this field."
+        },
+        "nullable": {
+          "type": "boolean",
+          "description": "Whether SQL NULL is allowed. PRIMARY columns and AUTO_INCREMENT columns must be false."
+        },
+        "autoIncrement": {
+          "type": "boolean",
+          "default": false,
+          "description": "Integer-only MySQL AUTO_INCREMENT. At most one per table; must lead a full, visible PRIMARY/UNIQUE/ordinary index and have no explicit default."
+        },
+        "default": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "\\S",
+          "description": "SQL default expression. Omitted or JSON null means no explicit default; \"NULL\" means DEFAULT NULL; \"''\" means an empty SQL string. Nonliteral expressions may need parentheses, e.g. \"(JSON_OBJECT())\". References to columns, subqueries and bind parameters are unsupported."
+        },
+        "onUpdate": {
+          "type": "string",
+          "description": "Optional SQL ON UPDATE expression, e.g. CURRENT_TIMESTAMP(6). Empty or omitted means none."
+        },
+        "charset": {
+          "$ref": "#/$defs/mysqlWord"
+        },
+        "collation": {
+          "$ref": "#/$defs/mysqlWord"
+        },
+        "comment": {
+          "type": "string",
+          "description": "Literal SQL column comment, without SQL quotes."
+        },
+        "generated": {
+          "type": "string",
+          "description": "Optional generated-column SQL expression without GENERATED ALWAYS AS or its outer wrapper. References SQL column names, not stable IDs. Empty or omitted means an ordinary column."
+        },
+        "stored": {
+          "type": "boolean",
+          "default": false,
+          "description": "True selects STORED for a generated column; false or omitted selects VIRTUAL. Requires a nonempty generated expression."
+        },
+        "invisible": {
+          "type": "boolean",
+          "default": false,
+          "description": "MySQL column invisibility. Presentation in the editor is independent."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "autoIncrement"
+            ],
+            "properties": {
+              "autoIncrement": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "nullable": {
+                "const": false
+              },
+              "default": {
+                "type": "null"
+              },
+              "generated": {
+                "const": ""
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "generated"
+            ],
+            "properties": {
+              "generated": {
+                "minLength": 1
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "default": {
+                "type": "null"
+              },
+              "autoIncrement": {
+                "const": false
+              },
+              "onUpdate": {
+                "const": ""
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "stored"
+            ],
+            "properties": {
+              "stored": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "generated"
+            ],
+            "properties": {
+              "generated": {
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "index": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "columns"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "$ref": "#/$defs/sqlName"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "PRIMARY",
+            "UNIQUE",
+            "INDEX",
+            "FULLTEXT",
+            "SPATIAL"
+          ],
+          "description": "Case-sensitive index kind. At most one PRIMARY index is permitted per table."
+        },
+        "columns": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/indexColumn"
+          },
+          "description": "Ordered index parts. Each references a distinct column ID in the owning table."
+        },
+        "invisible": {
+          "type": "boolean",
+          "default": false,
+          "description": "MySQL index invisibility; PRIMARY must remain visible."
+        },
+        "comment": {
+          "type": "string",
+          "description": "Literal SQL index comment, without SQL quotes."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "PRIMARY"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "name": {
+                "const": "PRIMARY"
+              },
+              "invisible": {
+                "const": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    "indexColumn": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "column"
+      ],
+      "properties": {
+        "column": {
+          "$ref": "#/$defs/id",
+          "description": "Column ID in the owning table, not its SQL name."
+        },
+        "length": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535,
+          "default": 0,
+          "description": "Optional MySQL prefix length; zero or omitted means the full column. MySQL measures characters for nonbinary strings and bytes for binary strings; compatibility/maximum size also depends on the type and engine."
+        },
+        "descending": {
+          "type": "boolean",
+          "default": false,
+          "description": "True emits DESC; false or omitted emits ASC."
+        }
+      }
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "",
+        "NO ACTION",
+        "RESTRICT",
+        "CASCADE",
+        "SET NULL"
+      ],
+      "description": "Case-sensitive MySQL referential action. Empty/omitted emits no action clause. SET NULL requires all source columns to be nullable."
+    },
+    "foreignKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "columns",
+        "referencedTable",
+        "referencedColumns"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "$ref": "#/$defs/sqlName"
+        },
+        "columns": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "description": "Ordered source column IDs in the owning table."
+        },
+        "referencedTable": {
+          "$ref": "#/$defs/id",
+          "description": "Document-scoped target table ID. Self-references and cycles are supported; cross-schema references are not."
+        },
+        "referencedColumns": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "description": "Ordered target column IDs in referencedTable; must have the same count as columns and match a full visible PRIMARY/UNIQUE key. Types/signs and explicit text settings must be compatible."
+        },
+        "onDelete": {
+          "$ref": "#/$defs/action"
+        },
+        "onUpdate": {
+          "$ref": "#/$defs/action"
+        },
+        "points": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/point"
+          },
+          "description": "Optional ordered manual connector bends in absolute diagram coordinates, from source toward target. Empty/omitted uses the editor's deterministic default route; no automatic layout rewrites stored points."
+        }
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "expression"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/sqlName"
+        },
+        "expression": {
+          "$ref": "#/$defs/nonblank",
+          "description": "SQL predicate without CHECK or its outer parentheses. Uses existing SQL column names in the owning table; edit these references when renaming columns."
+        },
+        "enforced": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "False emits NOT ENFORCED. True, JSON null and omission all mean enforced."
+        }
+      }
+    },
+    "group": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "color",
+        "position",
+        "width",
+        "height"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "$ref": "#/$defs/nonblank",
+          "description": "Human-readable group label; not an SQL identifier."
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$(?![\\s\\S])",
+          "description": "Six-digit CSS hex color."
+        },
+        "position": {
+          "$ref": "#/$defs/point",
+          "description": "Absolute top-left group corner in diagram space."
+        },
+        "width": {
+          "$ref": "#/$defs/width"
+        },
+        "height": {
+          "type": "number",
+          "minimum": 60,
+          "maximum": 10000000,
+          "description": "Finite height in diagram units. Moving a group in the editor translates its members' absolute table coordinates; editing only this rectangle does not move members on load."
+        }
+      }
+    }
+  }
+}
