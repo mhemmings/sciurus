@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic Workbench catalog and diagram, paired with independently authored SQL. -->
+<data grt_format="2.0" document_type="MySQL Workbench Model" version="1.4.4">
+  <value type="object" struct-name="workbench.Document" id="document">
+    <value type="list" key="physicalModels">
+      <value type="object" struct-name="workbench.physical.Model" id="physical-model">
+        <value type="object" key="catalog" struct-name="db.mysql.Catalog" id="catalog">
+          <value type="list" key="schemata">
+            <value type="object" struct-name="db.mysql.Schema" id="schema">
+              <value key="name">ledger</value>
+              <value key="defaultCharacterSetName">utf8mb4</value>
+              <value key="defaultCollationName">utf8mb4_bin</value>
+              <value type="list" key="views"/>
+              <value type="list" key="routines"/>
+              <value type="list" key="tables">
+                <value type="object" struct-name="db.mysql.Table" id="table-account">
+                  <link key="owner">schema</link>
+                  <value key="name">account</value>
+                  <value key="tableEngine">InnoDB</value>
+                  <value key="comment">Accounts</value>
+                  <value type="list" key="columns">
+                    <value type="object" struct-name="db.mysql.Column" id="account-id">
+                      <value key="name">id</value><link key="simpleType">com.mysql.rdbms.mysql.datatype.bigint</link>
+                      <value key="isNotNull">1</value><value key="autoIncrement">1</value>
+                      <value type="list" key="flags"><value>UNSIGNED</value></value>
+                    </value>
+                    <value type="object" struct-name="db.mysql.Column" id="account-region">
+                      <value key="name">region</value><link key="simpleType">com.mysql.rdbms.mysql.datatype.int</link><value key="isNotNull">1</value>
+                    </value>
+                    <value type="object" struct-name="db.mysql.Column" id="account-parent-id">
+                      <value key="name">parent_id</value><link key="simpleType">com.mysql.rdbms.mysql.datatype.bigint</link>
+                      <value type="list" key="flags"><value>UNSIGNED</value></value>
+                      <value key="defaultValueIsNull">1</value><value key="defaultValue"/>
+                    </value>
+                    <value type="object" struct-name="db.mysql.Column" id="account-parent-region">
+                      <value key="name">parent_region</value><link key="simpleType">com.mysql.rdbms.mysql.datatype.int</link>
+                      <value key="defaultValueIsNull">0</value><value key="defaultValue"/>
+                    </value>
+                    <value type="object" struct-name="db.mysql.Column" id="account-code">
+                      <value key="name">code</value><link key="simpleType">com.mysql.rdbms.mysql.datatype.varchar</link>
+                      <value key="length">40</value><value key="isNotNull">1</value><value key="defaultValue">''</value>
+                      <value key="characterSetName">ascii</value><value key="collationName">ascii_bin</value><value key="comment">Public code</value>
+                    </value>
+                    <value type="object" struct-name="db.mysql.Column" id="account-amount">
+                      <value key="name">amount</value><link key="simpleType">com.mysql.rdbms.mysql.datatype.decimal</link>
+                      <value key="precision">12</value><value key="scale">3</value><value key="isNotNull">1</value><value key="defaultValue">-1.250</value>
+                    </value>
+                    <value type="object" struct-name="db.mysql.Column" id="account-label">
+                      <value key="name">label</value><link key="simpleType">com.mysql.rdbms.mysql.datatype.varchar</link>
+                      <value key="length">30</value><value key="isNotNull">1</value><value key="defaultValue">'NULL'</value>
+                    </value>
+                    <value type="object" struct-name="db.mysql.Column" id="account-status">
+                      <value key="name">status</value><link key="simpleType">com.mysql.rdbms.mysql.datatype.enum</link>
+                      <value key="datatypeExplicitParams">('new','it''s ready')</value><value key="isNotNull">1</value><value key="defaultValue">'new'</value>
+                    </value>
+                    <value type="object" struct-name="db.mysql.Column" id="account-tags">
+                      <value key="name">tags</value><link key="simpleType">com.mysql.rdbms.mysql.datatype.set</link>
+                      <value key="datatypeExplicitParams">('one','two')</value><value key="defaultValueIsNull">1</value>
+                    </value>
+                    <value type="object" struct-name="db.mysql.Column" id="account-created">
+                      <value key="name">created_at</value><link key="simpleType">com.mysql.rdbms.mysql.datatype.datetime_f</link>
+                      <value key="length">6</value><value key="isNotNull">1</value><value key="defaultValue">CURRENT_TIMESTAMP(6)</value>
+                    </value>
+                    <value type="object" struct-name="db.mysql.Column" id="account-updated">
+                      <value key="name">updated_at</value><link key="simpleType">com.mysql.rdbms.mysql.datatype.timestamp_f</link>
+                      <value key="length">3</value><value key="isNotNull">1</value><value key="defaultValue">CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)</value>
+                    </value>
+                    <value type="object" struct-name="db.mysql.Column" id="account-doubled">
+                      <value key="name">doubled</value><link key="simpleType">com.mysql.rdbms.mysql.datatype.decimal</link>
+                      <value key="precision">14</value><value key="scale">3</value><value key="generated">1</value>
+                      <value key="expression">amount * 2</value><value key="generatedStorage">STORED</value>
+                    </value>
+                  </value>
+                  <value type="list" key="indices">
+                    <value type="object" struct-name="db.mysql.Index" id="account-primary">
+                      <value key="name">PRIMARY</value><value key="isPrimary">1</value><value key="indexType">PRIMARY</value><value key="visible">1</value>
+                      <value type="list" key="columns">
+                        <value type="object" struct-name="db.mysql.IndexColumn" id="account-primary-id"><link key="referencedColumn">account-id</link></value>
+                        <value type="object" struct-name="db.mysql.IndexColumn" id="account-primary-region"><link key="referencedColumn">account-region</link></value>
+                      </value>
+                    </value>
+                    <value type="object" struct-name="db.mysql.Index" id="account-parent-index">
+                      <value key="name">parent_account</value><value key="indexType">INDEX</value><value key="visible">1</value>
+                      <value type="list" key="columns">
+                        <value type="object" struct-name="db.mysql.IndexColumn" id="account-parent-index-id"><link key="referencedColumn">account-parent-id</link></value>
+                        <value type="object" struct-name="db.mysql.IndexColumn" id="account-parent-index-region"><link key="referencedColumn">account-parent-region</link></value>
+                      </value>
+                    </value>
+                    <value type="object" struct-name="db.mysql.Index" id="account-code-index">
+                      <value key="name">code_prefix</value><value key="indexType">INDEX</value><value key="visible">0</value><value key="comment">Lookup prefix</value>
+                      <value type="list" key="columns">
+                        <value type="object" struct-name="db.mysql.IndexColumn" id="account-code-index-code">
+                          <link key="referencedColumn">account-code</link><value key="columnLength">8</value><value key="descend">1</value>
+                        </value>
+                      </value>
+                    </value>
+                    <value type="object" struct-name="db.mysql.Index" id="account-graphical-index">
+                      <value key="name">graphical_only_index</value><value key="indexType">INDEX</value><value key="visible">1</value>
+                      <value type="list" key="columns">
+                        <value type="object" struct-name="db.mysql.IndexColumn" id="account-graphical-index-region"><link key="referencedColumn">account-region</link></value>
+                      </value>
+                    </value>
+                  </value>
+                  <link key="primaryKey">account-primary</link>
+                  <value type="list" key="foreignKeys">
+                    <value type="object" struct-name="db.mysql.ForeignKey" id="account-parent-key">
+                      <value key="name">account_parent</value><link key="owner">table-account</link><link key="referencedTable">table-account</link>
+                      <link key="index">account-parent-index</link>
+                      <value key="deleteRule">SET NULL</value><value key="updateRule">CASCADE</value>
+                      <value type="list" key="columns"><link>account-parent-id</link><link>account-parent-region</link></value>
+                      <value type="list" key="referencedColumns"><link>account-id</link><link>account-region</link></value>
+                    </value>
+                    <!-- Model-only FK indexes disappear unless shared by a physical FK or primary. -->
+                    <value type="object" struct-name="db.mysql.ForeignKey" id="graphical-key">
+                      <value key="name">graphical_only</value><value key="modelOnly">1</value><link key="referencedTable">not-a-physical-table</link>
+                      <link key="index">account-graphical-index</link>
+                    </value>
+                    <value type="object" struct-name="db.mysql.ForeignKey" id="graphical-shared-key">
+                      <value key="name">graphical_shared_index</value><value key="modelOnly">1</value><link key="referencedTable">not-a-physical-table</link>
+                      <link key="index">account-parent-index</link>
+                    </value>
+                    <value type="object" struct-name="db.mysql.ForeignKey" id="graphical-primary-key">
+                      <value key="name">graphical_primary_index</value><value key="modelOnly">1</value><link key="referencedTable">not-a-physical-table</link>
+                      <link key="index">account-primary</link>
+                    </value>
+                  </value>
+                  <value type="list" key="triggers"/>
+                </value>
+                <value type="object" struct-name="db.mysql.Table" id="table-entry">
+                  <link key="owner">schema</link><value key="name">entry</value><value key="tableEngine">InnoDB</value>
+                  <value key="defaultCharacterSetName">ascii</value><value key="defaultCollationName">ascii_bin</value>
+                  <value type="list" key="columns">
+                    <value type="object" struct-name="db.mysql.Column" id="entry-id">
+                      <value key="name">id</value><link key="simpleType">com.mysql.rdbms.mysql.datatype.int</link><value key="isNotNull">1</value>
+                    </value>
+                    <value type="object" struct-name="db.mysql.Column" id="entry-account">
+                      <value key="name">account_id</value><link key="simpleType">com.mysql.rdbms.mysql.datatype.bigint</link><value key="isNotNull">1</value>
+                      <value type="list" key="flags"><value>UNSIGNED</value></value>
+                    </value>
+                    <value type="object" struct-name="db.mysql.Column" id="entry-region">
+                      <value key="name">region</value><link key="simpleType">com.mysql.rdbms.mysql.datatype.int</link><value key="isNotNull">1</value>
+                    </value>
+                  </value>
+                  <value type="list" key="indices">
+                    <value type="object" struct-name="db.mysql.Index" id="entry-primary">
+                      <value key="name">PRIMARY</value><value key="isPrimary">1</value><value key="indexType">PRIMARY</value><value key="visible">1</value>
+                      <value type="list" key="columns"><value type="object" struct-name="db.mysql.IndexColumn" id="entry-primary-id"><link key="referencedColumn">entry-id</link></value></value>
+                    </value>
+                    <value type="object" struct-name="db.mysql.Index" id="entry-account-index">
+                      <value key="name">entry_account</value><value key="indexType">INDEX</value><value key="visible">1</value>
+                      <value type="list" key="columns">
+                        <value type="object" struct-name="db.mysql.IndexColumn" id="entry-account-index-account"><link key="referencedColumn">entry-account</link></value>
+                        <value type="object" struct-name="db.mysql.IndexColumn" id="entry-account-index-region"><link key="referencedColumn">entry-region</link></value>
+                      </value>
+                    </value>
+                    <value type="object" struct-name="db.mysql.Index" id="entry-concept-index">
+                      <value key="name">entry_concept</value><value key="indexType">INDEX</value><value key="visible">1</value>
+                      <value type="list" key="columns">
+                        <value type="object" struct-name="db.mysql.IndexColumn" id="entry-concept-index-region"><link key="referencedColumn">entry-region</link></value>
+                      </value>
+                    </value>
+                  </value>
+                  <link key="primaryKey">entry-primary</link>
+                  <value type="list" key="foreignKeys">
+                    <value type="object" struct-name="db.mysql.ForeignKey" id="entry-account-key">
+                      <value key="name">entry_account_fk</value><link key="owner">table-entry</link><link key="referencedTable">table-account</link>
+                      <value key="deleteRule">CASCADE</value><value key="updateRule">RESTRICT</value>
+                      <value type="list" key="columns"><link>entry-account</link><link>entry-region</link></value>
+                      <value type="list" key="referencedColumns"><link>account-id</link><link>account-region</link></value>
+                    </value>
+                    <!-- A physical FK to a model-only table is omitted without removing its index. -->
+                    <value type="object" struct-name="db.mysql.ForeignKey" id="entry-concept-key">
+                      <value key="name">entry_concept_fk</value><link key="owner">table-entry</link><link key="referencedTable">table-concept</link>
+                      <link key="index">entry-concept-index</link>
+                      <value type="list" key="columns"><link>entry-region</link></value>
+                      <value type="list" key="referencedColumns"><link>concept-id</link></value>
+                    </value>
+                  </value>
+                  <value type="list" key="triggers"/>
+                </value>
+                <value type="object" struct-name="db.mysql.Table" id="table-concept">
+                  <link key="owner">schema</link><value key="name">concept</value><value key="tableEngine">InnoDB</value><value key="modelOnly">1</value>
+                  <value type="list" key="columns">
+                    <value type="object" struct-name="db.mysql.Column" id="concept-id">
+                      <value key="name">id</value><link key="simpleType">com.mysql.rdbms.mysql.datatype.int</link><value key="isNotNull">1</value>
+                    </value>
+                  </value>
+                  <value type="list" key="indices"/>
+                  <value type="list" key="foreignKeys"/>
+                </value>
+              </value>
+            </value>
+          </value>
+        </value>
+        <value type="list" key="diagrams">
+          <value type="object" struct-name="workbench.physical.Diagram" id="diagram">
+            <value key="x">125</value><value key="y">75</value><value key="zoom">0.8</value>
+            <value type="object" key="rootLayer" struct-name="workbench.physical.Layer" id="root-layer">
+              <link key="owner">diagram</link><value key="name">Canvas</value><value key="left">0</value><value key="top">0</value>
+            </value>
+            <value type="list" key="layers">
+              <value type="object" struct-name="workbench.physical.Layer" id="layer-ledger">
+                <link key="owner">diagram</link><value key="name">Ledger</value><value key="color">#34a8b0</value>
+                <value key="left">200</value><value key="top">300</value><value key="width">1200</value><value key="height">900</value>
+              </value>
+            </value>
+            <value type="list" key="figures">
+              <value type="object" struct-name="workbench.physical.TableFigure" id="figure-account">
+                <link key="owner">diagram</link><link key="table">table-account</link><link key="layer">layer-ledger</link>
+                <value key="left">30</value><value key="top">40</value><value key="width">400</value>
+              </value>
+              <value type="object" struct-name="workbench.physical.TableFigure" id="figure-entry">
+                <link key="owner">diagram</link><link key="table">table-entry</link><link key="layer">layer-ledger</link>
+                <value key="left">600</value><value key="top">40</value><value key="width">320</value>
+              </value>
+            </value>
+          </value>
+        </value>
+      </value>
+    </value>
+  </value>
+</data>

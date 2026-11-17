@@ -1,0 +1,344 @@
+{
+  "version": 1,
+  "name": "Commerce",
+  "tables": [
+    {
+      "id": "customer",
+      "name": "customer",
+      "engine": "InnoDB",
+      "comment": "The people behind every order",
+      "position": {
+        "x": 112,
+        "y": 816
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "id",
+          "name": "id",
+          "type": "BIGINT unsigned",
+          "nullable": false,
+          "autoIncrement": true
+        },
+        {
+          "id": "email",
+          "name": "email",
+          "type": "VARCHAR(255)",
+          "nullable": false
+        },
+        {
+          "id": "name",
+          "name": "name",
+          "type": "VARCHAR(120)",
+          "nullable": false
+        },
+        {
+          "id": "created_at",
+          "name": "created_at",
+          "type": "DATETIME",
+          "nullable": false,
+          "default": "current_timestamp()"
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        {
+          "id": "customer_email",
+          "name": "customer_email",
+          "kind": "UNIQUE",
+          "columns": [
+            {
+              "column": "email"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [],
+      "groupId": "customers"
+    },
+    {
+      "id": "purchase",
+      "name": "purchase",
+      "engine": "InnoDB",
+      "comment": "Orders from checkout to delivery",
+      "position": {
+        "x": 112,
+        "y": 152
+      },
+      "width": 336,
+      "columns": [
+        {
+          "id": "id",
+          "name": "id",
+          "type": "BIGINT unsigned",
+          "nullable": false,
+          "autoIncrement": true
+        },
+        {
+          "id": "customer_id",
+          "name": "customer_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "status",
+          "name": "status",
+          "type": "ENUM('draft', 'paid', 'shipped')",
+          "nullable": false,
+          "default": "'draft'"
+        },
+        {
+          "id": "total",
+          "name": "total",
+          "type": "DECIMAL(12,2)",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "id": "placed_at",
+          "name": "placed_at",
+          "type": "DATETIME",
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        {
+          "id": "purchase_customer",
+          "name": "purchase_customer",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "customer_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "purchase_customer_fk",
+          "name": "purchase_customer_fk",
+          "columns": [
+            "customer_id"
+          ],
+          "referencedTable": "customer",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "RESTRICT"
+        }
+      ],
+      "groupId": "commerce"
+    },
+    {
+      "id": "product",
+      "name": "product",
+      "engine": "InnoDB",
+      "position": {
+        "x": 528,
+        "y": 152
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "id",
+          "name": "id",
+          "type": "BIGINT unsigned",
+          "nullable": false,
+          "autoIncrement": true
+        },
+        {
+          "id": "sku",
+          "name": "sku",
+          "type": "VARCHAR(64)",
+          "nullable": false
+        },
+        {
+          "id": "name",
+          "name": "name",
+          "type": "VARCHAR(255)",
+          "nullable": false
+        },
+        {
+          "id": "price",
+          "name": "price",
+          "type": "DECIMAL(12,2)",
+          "nullable": false
+        },
+        {
+          "id": "attributes",
+          "name": "attributes",
+          "type": "JSON",
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        {
+          "id": "product_sku",
+          "name": "product_sku",
+          "kind": "UNIQUE",
+          "columns": [
+            {
+              "column": "sku"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [],
+      "checks": [
+        {
+          "name": "product_price_positive",
+          "expression": "price >= 0",
+          "enforced": true
+        }
+      ],
+      "groupId": "commerce"
+    },
+    {
+      "id": "purchase_item",
+      "name": "purchase_item",
+      "engine": "InnoDB",
+      "position": {
+        "x": 112,
+        "y": 414
+      },
+      "width": 304,
+      "columns": [
+        {
+          "id": "purchase_id",
+          "name": "purchase_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "product_id",
+          "name": "product_id",
+          "type": "BIGINT unsigned",
+          "nullable": false
+        },
+        {
+          "id": "quantity",
+          "name": "quantity",
+          "type": "INT unsigned",
+          "nullable": false,
+          "default": "1"
+        },
+        {
+          "id": "unit_price",
+          "name": "unit_price",
+          "type": "DECIMAL(12,2)",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "id": "PRIMARY",
+          "name": "PRIMARY",
+          "kind": "PRIMARY",
+          "columns": [
+            {
+              "column": "purchase_id"
+            },
+            {
+              "column": "product_id"
+            }
+          ]
+        },
+        {
+          "id": "item_product",
+          "name": "item_product",
+          "kind": "INDEX",
+          "columns": [
+            {
+              "column": "product_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": "item_purchase_fk",
+          "name": "item_purchase_fk",
+          "columns": [
+            "purchase_id"
+          ],
+          "referencedTable": "purchase",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "id": "item_product_fk",
+          "name": "item_product_fk",
+          "columns": [
+            "product_id"
+          ],
+          "referencedTable": "product",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "RESTRICT"
+        }
+      ],
+      "groupId": "commerce"
+    }
+  ],
+  "groups": [
+    {
+      "id": "customers",
+      "name": "Customer experience",
+      "color": "#3b82f6",
+      "position": {
+        "x": 80,
+        "y": 744
+      },
+      "width": 368,
+      "height": 258
+    },
+    {
+      "id": "commerce",
+      "name": "Orders & catalogue",
+      "color": "#14b8a6",
+      "position": {
+        "x": 80,
+        "y": 80
+      },
+      "width": 784,
+      "height": 520
+    }
+  ],
+  "viewport": {
+    "x": 32,
+    "y": 32,
+    "zoom": 1
+  }
+}

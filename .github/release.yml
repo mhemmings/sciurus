@@ -1,0 +1,16 @@
+# Configuration for GitHub's generated release notes, not an Actions workflow.
+# publish-release.yml requests these notes with gh release create --generate-notes.
+changelog:
+  categories:
+    - title: Breaking changes
+      labels:
+        - breaking-change
+    - title: Features
+      labels:
+        - enhancement
+    - title: Fixes
+      labels:
+        - bug
+    - title: Other changes
+      labels:
+        - '*'

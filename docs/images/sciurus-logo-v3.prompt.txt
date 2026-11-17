@@ -1,0 +1,3 @@
+Use case: precise-object-edit.
+Edit the attached Sciurus logo with one narrowly scoped change: remove the word "users" from the left cyan table header and remove the word "posts" from the right cyan table header. Fill only the removed lettering with the existing cyan header color and shading, leaving both header bars blank. Do not replace the words with any symbols, lines or other text.
+Preserve everything else exactly: squirrel, face, glasses, tail, paws, colors, outlines, table card sizes and positions, key symbols, field strokes, relationship connector, acorn database, framing, and original transparent background. Do not redesign or restyle anything. Preserve genuine alpha transparency and output a PNG.

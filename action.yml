@@ -1,0 +1,67 @@
+name: Sciurus
+description: Validate MySQL ER models, diff schemas, and check model/SQL consistency.
+branding:
+  icon: database
+  color: blue
+
+inputs:
+  command:
+    description: Operation to run, either validate or diff.
+    default: validate
+  model:
+    description: Model JSON file to validate, relative to the workspace or absolute.
+  before:
+    description: Model JSON or SQL file before a schema change.
+  after:
+    description: Model JSON or SQL file after a schema change.
+  format:
+    description: Diff report format, either text or png.
+    default: text
+  output:
+    description: Diff report destination. Defaults to a unique file in the runner temporary directory.
+  fail-on-changes:
+    description: Fail when a diff finds database changes, for model/SQL consistency checks.
+    default: 'false'
+
+outputs:
+  changed:
+    description: Whether a completed diff found database changes, as true or false. Empty for validation or errors.
+    value: ${{ steps.run.outputs.changed }}
+  report:
+    description: Absolute path to the completed diff report, including when fail-on-changes fails the action.
+    value: ${{ steps.run.outputs.report }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Go for Sciurus
+      uses: actions/setup-go@v7.1.0
+      with:
+        go-version-file: ${{ github.action_path }}/go.mod
+        # Downloaded actions live outside the workspace used for dependency hashing.
+        cache: 'false'
+
+    - name: Install Sciurus
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      env:
+        GOWORK: 'off'
+        CGO_ENABLED: '0'
+      run: |
+        install_directory=$(mktemp -d "$RUNNER_TEMP/sciurus-bin.XXXXXX")
+        GOBIN="$install_directory" go install ./cmd/sciurus
+        printf '%s\n' "$install_directory" >> "$GITHUB_PATH"
+
+    - name: Run Sciurus
+      id: run
+      shell: bash
+      env:
+        SCIURUS_ACTION_PATH: ${{ github.action_path }}
+        SCIURUS_COMMAND: ${{ inputs.command }}
+        SCIURUS_MODEL: ${{ inputs.model }}
+        SCIURUS_BEFORE: ${{ inputs.before }}
+        SCIURUS_AFTER: ${{ inputs.after }}
+        SCIURUS_FORMAT: ${{ inputs.format }}
+        SCIURUS_OUTPUT: ${{ inputs.output }}
+        SCIURUS_FAIL_ON_CHANGES: ${{ inputs.fail-on-changes }}
+      run: bash "$SCIURUS_ACTION_PATH/scripts/action.sh"
