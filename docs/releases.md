@@ -41,12 +41,14 @@ action's dependencies. Generate it with GitHub's CLI extension; do not edit it b
 
 ```sh
 gh extension install github/gh-actions-lock --pin v0.4.1
-gh actions-lock
+gh actions-lock --no-narrow
 gh actions-lock --verify
 ```
 
-Run `gh actions-lock` after changing an action reference and commit its changes
-together with the workflow. Dependabot checks Go modules, frontend dependencies
+Run `gh actions-lock --no-narrow` after changing an action reference and commit
+its changes together with the workflow. `--no-narrow` preserves the composite
+action's full SHA pins, which consuming repositories may require independently
+of this repository's lockfile. Dependabot checks Go modules, frontend dependencies
 (including development tools), and GitHub Actions weekly. It updates the matching
 dependency lockfiles in its PRs. CI verifies action coverage and upstream provenance.
 
