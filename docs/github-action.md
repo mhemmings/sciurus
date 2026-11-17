@@ -2,15 +2,20 @@
 
 Use Sciurus as a step in another repository's workflow to validate models,
 review schema changes, or check that a model and SQL file agree. No database,
-Docker or browser tooling is needed.
+Docker, Go toolchain or browser tooling is needed.
 
-The action lives at the repository root. After the first release, reference it
-as `mhemmings/sciurus@v0`, or select a published version tag or commit.
-It installs the Go version Sciurus needs and builds the CLI from that exact
-action revision. Your repository does not need to be a Go project.
+The action lives at the repository root. Reference it as `mhemmings/sciurus@v0`,
+or select a published version tag or commit. Supply the binary release separately
+with the required `version` input, such as `v0.1.2`. The action downloads that
+release's matching archive and verifies its SHA-256 checksum before extraction
+or execution. The runner's existing Go toolchain is untouched.
 
 If your repository requires full commit SHA pins, use the release's commit SHA
-instead of `@v0`. Dependencies inside the Sciurus action also use full SHA pins.
+instead of `@v0`, and still supply `version: v0.1.2`. The action ref selects the
+installer implementation; `version` selects the binary. Versions must use a
+published stable `vMAJOR.MINOR.PATCH` tag; `latest`, branches and commit SHAs are
+not binary-version inputs. The action has no nested third-party actions or
+source-build fallback.
 
 ## Validate a model
 
@@ -31,6 +36,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: mhemmings/sciurus@v0
         with:
+          version: v0.1.2
           command: validate
           model: db/diagram.er.json
 ```
@@ -45,6 +51,7 @@ colours, IDs and other presentation details do not affect the comparison.
 ```yaml
 - uses: mhemmings/sciurus@v0
   with:
+    version: v0.1.2
     command: diff
     before: db/diagram.er.json
     after: db/schema.sql
@@ -58,7 +65,7 @@ schema comparison, not a byte-for-byte check of the SQL file.
 
 The action compares two files. Your workflow chooses which commits supply them.
 This example compares the model from the pull request's base commit with the
-checked-out version, then uploads a visual report:
+checked-out version, then uploads a visual report only when the schema changes:
 
 ```yaml
 name: Schema changes
@@ -82,8 +89,18 @@ jobs:
         run: git show "${BASE_SHA}:db/diagram.er.json" > "$RUNNER_TEMP/before.er.json"
 
       - uses: mhemmings/sciurus@v0
+        id: changes
+        with:
+          version: v0.1.2
+          command: diff
+          before: ${{ runner.temp }}/before.er.json
+          after: db/diagram.er.json
+
+      - uses: mhemmings/sciurus@v0
+        if: steps.changes.outputs.changed == 'true'
         id: schema
         with:
+          version: v0.1.2
           command: diff
           before: ${{ runner.temp }}/before.er.json
           after: db/diagram.er.json
@@ -103,7 +120,20 @@ merge base.
 Diffs succeed when they find changes unless `fail-on-changes` is `true`. Input,
 comparison and output errors always fail. Reports and outputs are available
 before a consistency check fails, so the artifact step above also works with
-`fail-on-changes: 'true'`.
+`fail-on-changes: 'true'` on the PNG step.
+
+## Installation and runner support
+
+Supported targets are Linux amd64/arm64, macOS Intel/Apple Silicon, and Windows
+amd64. The installer uses Bash (Git Bash on Windows), `curl`, `sha256sum` or
+`shasum`, and `tar` for Linux/macOS or `unzip` for Windows. Windows also uses
+Git Bash's `cygpath`. These tools are available on standard GitHub-hosted runners;
+self-hosted runners must supply them.
+
+Downloads are reused within a job for the same version and platform. Every
+invocation rechecks the cached archive's checksum, extracts a fresh executable,
+checks its reported version, and adds it to `PATH`. Download, checksum and
+installation failures fail the action.
 
 ## Inputs
 
@@ -113,6 +143,7 @@ model or one pair of schemas; use additional steps or a matrix for more files.
 
 | Input | Default | Purpose |
 | --- | --- | --- |
+| `version` | — | Required published binary release, such as `v0.1.2`. Independent of the action ref. |
 | `command` | `validate` | `validate` or `diff`. |
 | `model` | — | Required for validation; path to a model JSON file. |
 | `before` | — | Required for diff; path to the earlier schema. |
@@ -135,9 +166,6 @@ output. Use text for comparisons too large to render as a PNG.
 Both outputs are empty for validation or an unsuccessful comparison. A diff
 that finds changes still publishes both outputs when `fail-on-changes` fails
 the step. The installed `sciurus` executable also remains on `PATH` for later
-steps in the same job. The action's Go toolchain remains selected too; if your
-project needs another Go version, configure it after this step or in a separate
-job.
+steps in the same job.
 
-The action uses [GitHub's composite action format](https://docs.github.com/en/actions/tutorials/create-actions/create-a-composite-action)
-and [setup-go](https://github.com/actions/setup-go) to manage its Go toolchain.
+The action uses [GitHub's composite action format](https://docs.github.com/en/actions/tutorials/create-actions/create-a-composite-action).

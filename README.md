@@ -220,7 +220,8 @@ sciurus --help
 ## GitHub Actions
 
 Validate models, compare schemas and check model/SQL consistency from another
-repository using `mhemmings/sciurus@v0` after the first release.
+repository using `mhemmings/sciurus@v0` with `version: v0.1.2`. The action installs
+a verified release binary; consuming jobs need no Go toolchain.
 See the [GitHub Action guide](docs/github-action.md) for workflows, visual reports
 and available inputs.
 

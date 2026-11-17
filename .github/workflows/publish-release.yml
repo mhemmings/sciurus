@@ -63,3 +63,10 @@ jobs:
           VERSION: ${{ needs.version.outputs.version }}
           RELEASE_COMMIT: ${{ needs.version.outputs.commit }}
         run: bash scripts/publish-release.sh "$VERSION" "$RELEASE_COMMIT" "$RUNNER_TEMP/release"
+
+  verify-action:
+    name: Published action checks
+    needs: [version, publish]
+    uses: ./.github/workflows/action-tests.yml
+    with:
+      version: ${{ needs.version.outputs.version }}
