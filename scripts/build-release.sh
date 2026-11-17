@@ -15,6 +15,8 @@ stage=$(mktemp -d)
 trap 'rm -rf "$stage"' EXIT
 os=$(go env GOOS)
 arch=$(go env GOARCH)
+host_os=$(go env GOHOSTOS)
+host_arch=$(go env GOHOSTARCH)
 executable=sciurus
 if [[ "$os" == windows ]]; then executable=sciurus.exe; fi
 
@@ -27,9 +29,10 @@ cp internal/diffimage/FONT-LICENSE.txt "$stage/FONT-LICENSE.txt"
 archive="$output_directory/sciurus_${version#v}_${os}_${arch}"
 if [[ "$os" == windows ]]; then
   archive="$archive.zip"
-  (cd "$stage" && 7z a -tzip -bso0 -bsp0 "$archive" "$executable" LICENSE FONT-LICENSE.txt)
+  (cd "$stage" && zip -q "$stage/release.zip" "$executable" LICENSE FONT-LICENSE.txt)
+  mv "$stage/release.zip" "$archive"
   mkdir "$stage/extracted"
-  7z x -bso0 -bsp0 "-o$stage/extracted" "$archive"
+  unzip -q "$archive" -d "$stage/extracted"
 else
   archive="$archive.tar.gz"
   tar -czf "$archive" -C "$stage" "$executable" LICENSE FONT-LICENSE.txt
@@ -37,5 +40,21 @@ else
   tar -xzf "$archive" -C "$stage/extracted"
 fi
 
-bash scripts/smoke-release.sh "$stage/extracted/$executable" "$version"
+cmp "$stage/$executable" "$stage/extracted/$executable"
+cmp LICENSE "$stage/extracted/LICENSE"
+cmp internal/diffimage/FONT-LICENSE.txt "$stage/extracted/FONT-LICENSE.txt"
+go version -m "$stage/extracted/$executable" > "$stage/build-info"
+grep -qFx $'\tbuild\tGOOS='"$os" "$stage/build-info"
+grep -qFx $'\tbuild\tGOARCH='"$arch" "$stage/build-info"
+grep -qFx $'\tbuild\tCGO_ENABLED=0' "$stage/build-info"
+
+if [[ "$os" == "$host_os" && "$arch" == "$host_arch" ]]; then
+  bash scripts/smoke-release.sh "$stage/extracted/$executable" "$version"
+else
+  # Trimmed build metadata omits linker flags; inspect the embedded version
+  # without attempting to execute a binary for a different OS or architecture.
+  LC_ALL=C strings -a -n 3 "$stage/extracted/$executable" > "$stage/strings"
+  grep -qE "${version//./[.]}$" "$stage/strings"
+  printf 'Cross-compiled binary checks passed for %s/%s (%s).\n' "$os" "$arch" "$version"
+fi
 printf 'Packaged %s\n' "$archive"

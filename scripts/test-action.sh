@@ -62,7 +62,9 @@ report=$(sed -n '3p' "$GITHUB_OUTPUT")
 [[ "$report" == "$GITHUB_WORKSPACE/reports with spaces/schema diff.txt" ]]
 grep -q 'title' "$report"
 
-run_action 0 SCIURUS_COMMAND=diff SCIURUS_BEFORE=before.sql SCIURUS_AFTER=after.sql SCIURUS_FORMAT=png
+run_action 1 SCIURUS_COMMAND=diff SCIURUS_BEFORE=before.sql SCIURUS_AFTER=after.sql \
+  SCIURUS_FORMAT=png SCIURUS_FAIL_ON_CHANGES=true
+grep -qx 'changed=true' "$GITHUB_OUTPUT"
 report=$(sed -n '3p' "$GITHUB_OUTPUT")
 [[ "$(od -An -tx1 -N8 "$report" | tr -d ' \n')" == 89504e470d0a1a0a ]]
 grep -q '^PNG schema diff:' "$test_directory/log"

@@ -188,10 +188,11 @@ Also compare before and after a layout-only edit. Both comparisons must be
 byte-identical. When retaining timestamps, remove only the generated-at comment
 for comparison; normalizing additional SQL could hide an ordering regression.
 
-Go can cross-compile the self-contained executable with `CGO_ENABLED=0`, but
-successful compilation alone does not establish that a binary runs on its target
-operating system. The [CI and release workflows](releases.md) extract and smoke-test
-archives on native Linux, macOS and Windows runners.
+The [CI and release workflows](releases.md) run on Ubuntu. Both Linux archives
+are extracted and executed on matching Ubuntu architectures. macOS and Windows
+binaries are cross-compiled with `CGO_ENABLED=0`; their archives, target metadata
+and embedded version strings are checked without executing them. CI does not
+establish runtime behavior on macOS or Windows.
 
 Build and check a native archive locally with:
 
@@ -199,10 +200,16 @@ Build and check a native archive locally with:
 bash scripts/build-release.sh dev /tmp/sciurus-release
 ```
 
-The check exercises the extracted executable's version, import, validation,
-deterministic generation, text/PNG diffs, HTTP assets and embedded examples.
-Windows packaging uses the runner's 7-Zip installation. Publication behaviour can
-be checked against a temporary Git repository and a simulated GitHub CLI:
+For a host-matching target, the check exercises the extracted executable's
+version, import, validation, deterministic generation, text/PNG diffs, HTTP
+assets and embedded examples. Set `GOOS` and `GOARCH` to build another target:
+
+```sh
+GOOS=windows GOARCH=amd64 bash scripts/build-release.sh dev /tmp/sciurus-release
+```
+
+Foreign targets receive static archive and binary checks. Publication behaviour
+can be checked against a temporary Git repository and a simulated GitHub CLI:
 
 ```sh
 bash scripts/test-release.sh

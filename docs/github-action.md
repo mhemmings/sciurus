@@ -9,6 +9,9 @@ as `mhemmings/sciurus@v0`, or select a published version tag or commit.
 It installs the Go version Sciurus needs and builds the CLI from that exact
 action revision. Your repository does not need to be a Go project.
 
+If your repository requires full commit SHA pins, use the release's commit SHA
+instead of `@v0`. Dependencies inside the Sciurus action also use full SHA pins.
+
 ## Validate a model
 
 Check the model's format, SQL syntax and references on pushes and pull requests:

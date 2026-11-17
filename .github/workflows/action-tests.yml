@@ -33,6 +33,7 @@ jobs:
           command: diff
           before: ${{ runner.temp }}/before.sql
           after: ${{ runner.temp }}/after.sql
+          format: png
           fail-on-changes: 'true'
       - name: Check failed action outputs
         env:
@@ -43,3 +44,4 @@ jobs:
           test "$OUTCOME" = failure
           test "$CHANGED" = true
           test -s "$REPORT"
+          test "$(od -An -tx1 -N8 "$REPORT" | tr -d ' \n')" = 89504e470d0a1a0a
