@@ -2,6 +2,12 @@ name: Test the Sciurus action
 
 on:
   workflow_call:
+    inputs:
+      version:
+        description: Published binary release used by installer and action checks.
+        type: string
+        # CI needs an existing release; checks after publication pass the new tag.
+        default: v0.1.1
 
 permissions:
   contents: read
@@ -13,11 +19,13 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7.0.1
-      # The repository root contains the Sciurus composite action in action.yml.
-      # The $/ reference runs it at this workflow's commit and locks its dependencies.
+      - name: Check release installation and checksum failures
+        run: bash scripts/test-install-action.sh
+      # The $/ reference tests the root composite action at this workflow's commit.
       - name: Validate a bundled model with the Sciurus action
         uses: $/
         with:
+          version: ${{ inputs.version }}
           model: examples/starter.json
       - name: Exercise action behavior
         run: bash scripts/test-action.sh
@@ -30,6 +38,7 @@ jobs:
         continue-on-error: true
         uses: $/
         with:
+          version: ${{ inputs.version }}
           command: diff
           before: ${{ runner.temp }}/before.sql
           after: ${{ runner.temp }}/after.sql

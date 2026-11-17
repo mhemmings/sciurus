@@ -5,6 +5,9 @@ branding:
   color: blue
 
 inputs:
+  version:
+    description: Published Sciurus binary release, such as v0.1.2. Independent of the action reference.
+    required: true
   command:
     description: Operation to run, either validate or diff.
     default: validate
@@ -34,23 +37,12 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Set up Go for Sciurus
-      uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
-      with:
-        go-version-file: ${{ github.action_path }}/go.mod
-        # Downloaded actions live outside the workspace used for dependency hashing.
-        cache: 'false'
-
-    - name: Install Sciurus
+    - name: Install verified Sciurus release
       shell: bash
-      working-directory: ${{ github.action_path }}
       env:
-        GOWORK: 'off'
-        CGO_ENABLED: '0'
-      run: |
-        install_directory=$(mktemp -d "$RUNNER_TEMP/sciurus-bin.XXXXXX")
-        GOBIN="$install_directory" go install ./cmd/sciurus
-        printf '%s\n' "$install_directory" >> "$GITHUB_PATH"
+        SCIURUS_ACTION_PATH: ${{ github.action_path }}
+        SCIURUS_VERSION: ${{ inputs.version }}
+      run: bash "$SCIURUS_ACTION_PATH/scripts/install-action.sh"
 
     - name: Run Sciurus
       id: run

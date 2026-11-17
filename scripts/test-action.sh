@@ -4,12 +4,8 @@ set -euo pipefail
 project_directory=$(cd "$(dirname "$0")/.." && pwd)
 test_directory=$(mktemp -d)
 trap 'rm -rf "$test_directory"' EXIT
-mkdir -p "$test_directory/bin" "$test_directory/workspace with spaces" "$test_directory/runner"
-(
-  cd "$project_directory"
-  GOWORK=off GOBIN="$test_directory/bin" go install ./cmd/sciurus
-)
-export PATH="$test_directory/bin:$PATH"
+command -v sciurus >/dev/null 2>&1 || { echo 'Install Sciurus and add it to PATH before running action checks.' >&2; exit 1; }
+mkdir -p "$test_directory/workspace with spaces" "$test_directory/runner"
 export GITHUB_WORKSPACE="$test_directory/workspace with spaces"
 export RUNNER_TEMP="$test_directory/runner"
 export GITHUB_OUTPUT="$test_directory/outputs"

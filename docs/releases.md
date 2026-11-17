@@ -8,7 +8,7 @@ Every pull request and push to `main` runs the same CI suite:
 - Frontend formatting, types, unit tests, example layouts and a production build.
 - A check that the committed frontend assets match that build.
 - Playwright Chromium journeys, with failure diagnostics saved as artifacts.
-- The reusable GitHub Action's validation, diff and failure behaviour.
+- The reusable GitHub Action's verified binary installation, validation, diff and failure behaviour.
 - Release builds and archive checks for all supported platforms, with executable smoke checks on Linux.
 - Verification of the GitHub Actions dependency lockfile against upstream commits.
 
@@ -24,33 +24,32 @@ with `CGO_ENABLED=0` and checked without execution.
 | File | Purpose |
 | --- | --- |
 | [ci.yml](../.github/workflows/ci.yml) | Runs checks on PRs and `main`, and is called for releases. |
-| [action-tests.yml](../.github/workflows/action-tests.yml) | Tests the reusable Sciurus action defined in the root `action.yml`. |
+| [action-tests.yml](../.github/workflows/action-tests.yml) | Tests installation and the reusable Sciurus action against a selected published binary release. |
 | [release-builds.yml](../.github/workflows/release-builds.yml) | Builds and checks archives for all five targets on Ubuntu. Called by CI for both PRs and releases. |
-| [publish-release.yml](../.github/workflows/publish-release.yml) | Checks a pushed version tag, runs CI, then publishes the resulting archives. |
+| [publish-release.yml](../.github/workflows/publish-release.yml) | Checks a pushed version tag, runs CI, publishes the archives, then tests the action with that release. |
 | [.github/release.yml](../.github/release.yml) | Configures the categories in GitHub's generated release notes. It does not run jobs. |
 
 `release-builds.yml` and `action-tests.yml` use `workflow_call` so CI and releases
 share the same checks. They have no manual `workflow_dispatch` trigger.
 In action tests, `uses: $/` means the Sciurus action at the repository root,
-at the workflow's own commit. Its remote dependencies are included in the lockfile.
+at the workflow's own commit. The action itself downloads a separately selected
+published binary and has no nested action dependencies.
 
 ## Action dependencies
 
 [actions.lock](../.github/workflows/actions.lock) uses GitHub's
 [workflow dependency lockfile](https://docs.github.com/en/actions/concepts/security/workflow-dependency-lockfiles)
-to record the exact commits of workflow actions, including the Sciurus composite
-action's dependencies. Generate it with GitHub's CLI extension; do not edit it by hand:
+to record the exact commits of workflow actions. Generate it with GitHub's CLI
+extension; do not edit it by hand:
 
 ```sh
 gh extension install github/gh-actions-lock --pin v0.4.1
-gh actions-lock --no-narrow
+gh actions-lock
 gh actions-lock --verify
 ```
 
-Run `gh actions-lock --no-narrow` after changing an action reference and commit
-its changes together with the workflow. `--no-narrow` preserves the composite
-action's full SHA pins, which consuming repositories may require independently
-of this repository's lockfile. Dependabot checks Go modules, frontend dependencies
+Run `gh actions-lock` after changing an action reference and commit its changes
+together with the workflow. Dependabot checks Go modules, frontend dependencies
 (including development tools), and GitHub Actions weekly. It updates the matching
 dependency lockfiles in its PRs. CI verifies action coverage and upstream provenance.
 
@@ -83,8 +82,13 @@ No version file, PR label or release commit is needed. Source builds report
 archives embed the tag's version.
 
 The release workflow runs the full CI suite against the tagged commit, packages
-and tests the binaries, and publishes those exact archives. Failed checks block
-publication. Only the publication job has permission to write repository contents.
+and tests the binaries, and publishes those exact archives. Prepublication checks
+must pass before publication. Only the publication job can write repository contents.
+
+Prepublication action checks download the existing stable `v0.1.1` release. After
+the archives are published, the workflow runs the same checks with the new tag,
+verifying the actual release installer, validation and PNG diff behavior. This
+keeps CI independent of unpublished assets.
 
 ## Release contents
 
@@ -108,7 +112,9 @@ Clear PR titles make the generated notes useful; labels only affect grouping.
 
 Each release also updates its floating major action tag: `v0.1.0` updates `v0`,
 while `v1.0.0` updates `v1`. Consumers can use `mhemmings/sciurus@v0`, or pin an
-exact release tag or commit. Full version tags stay fixed.
+exact release tag or commit. They must also select the binary explicitly with
+`version: v0.1.2`; the action ref does not choose its binary version. Full version
+tags stay fixed.
 
 ## Reruns
 

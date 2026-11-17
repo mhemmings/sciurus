@@ -45,7 +45,18 @@ Browser failures retain a Playwright trace in `web/test-results`.
 
 ## GitHub Action checks
 
-Run the action's command handling against a freshly installed CLI:
+Check the installer with isolated release fixtures and a stub downloader:
+
+```sh
+bash scripts/test-install-action.sh
+```
+
+These checks need Bash and archive/checksum tools, without Go or network access.
+They cover successful installation and reuse, supported target selection, and
+checksum rejection before extraction or execution, plus download and version
+failures.
+
+With an installed `sciurus` on `PATH`, run the action's command handling:
 
 ```sh
 bash scripts/test-action.sh
@@ -53,8 +64,13 @@ bash scripts/test-action.sh
 
 These checks cover model validation, mixed model/SQL comparisons, changed and
 unchanged schemas, failure outputs, PNG reports and quoted file paths. They
-require Go, without a database or frontend tools. The GitHub Action workflow
-also exercises the composite action itself.
+require the installed CLI, without Go, a database or frontend tools. The GitHub
+Action workflow also exercises the complete composite action against published
+binaries, including PNG reports retained when `fail-on-changes` fails.
+
+Prepublication CI uses the stable `v0.1.1` binary release to test the installer
+without depending on assets that are still being built. After publication, the
+release workflow reruns these action checks against the newly published version.
 
 ## Schema equivalence and live MySQL
 
