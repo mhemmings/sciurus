@@ -19,7 +19,7 @@
     "vue": "3.5.42"
   },
   "devDependencies": {
-    "@playwright/test": "1.63.0",
+    "@playwright/test": "1.65.1",
     "@tailwindcss/vite": "4.3.3",
     "@types/node": "26.5.1",
     "@types/sortablejs": "1.15.9",
