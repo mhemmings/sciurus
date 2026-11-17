@@ -14,7 +14,7 @@ test "$(git rev-parse HEAD)" = "$commit"
 shopt -s nullglob
 archives=("$asset_directory"/*.tar.gz "$asset_directory"/*.zip)
 if [[ ${#archives[@]} != 5 ]]; then
-  echo 'Expected all five native release archives.' >&2
+  echo 'Expected all five release archives.' >&2
   exit 1
 fi
 (

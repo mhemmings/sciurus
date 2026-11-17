@@ -9,13 +9,15 @@ Every pull request and push to `main` runs the same CI suite:
 - A check that the committed frontend assets match that build.
 - Playwright Chromium journeys, with failure diagnostics saved as artifacts.
 - The reusable GitHub Action's validation, diff and failure behaviour.
-- Native Go tests, release builds and packaged-binary smoke checks on all supported platforms.
+- Release builds and archive checks for all supported platforms, with executable smoke checks on Linux.
 - Verification of the GitHub Actions dependency lockfile against upstream commits.
 
 The aggregate **CI checks** job succeeds only when every job passes. Configure it
 as a required check on `main` in the GitHub repository's branch rules.
 
-Linux jobs use Ubuntu 26.04 LTS, including its native arm64 runner.
+All jobs use Ubuntu 26.04 LTS. Linux arm64 builds use its arm64 runner so both
+Linux archives can be executed. macOS and Windows binaries are cross-compiled
+with `CGO_ENABLED=0` and checked without execution.
 
 ## Workflow files
 
@@ -23,11 +25,11 @@ Linux jobs use Ubuntu 26.04 LTS, including its native arm64 runner.
 | --- | --- |
 | [ci.yml](../.github/workflows/ci.yml) | Runs checks on PRs and `main`, and is called for releases. |
 | [action-tests.yml](../.github/workflows/action-tests.yml) | Tests the reusable Sciurus action defined in the root `action.yml`. |
-| [native-builds.yml](../.github/workflows/native-builds.yml) | Builds, tests and packages binaries for all five targets. Called by CI for both PRs and releases. |
+| [release-builds.yml](../.github/workflows/release-builds.yml) | Builds and checks archives for all five targets on Ubuntu. Called by CI for both PRs and releases. |
 | [publish-release.yml](../.github/workflows/publish-release.yml) | Checks a pushed version tag, runs CI, then publishes the resulting archives. |
 | [.github/release.yml](../.github/release.yml) | Configures the categories in GitHub's generated release notes. It does not run jobs. |
 
-`native-builds.yml` and `action-tests.yml` use `workflow_call` so CI and releases
+`release-builds.yml` and `action-tests.yml` use `workflow_call` so CI and releases
 share the same checks. They have no manual `workflow_dispatch` trigger.
 In action tests, `uses: $/` means the Sciurus action at the repository root,
 at the workflow's own commit. Its remote dependencies are included in the lockfile.
@@ -93,9 +95,10 @@ publication. Only the publication job has permission to write repository content
 | Windows | amd64 | `.zip` |
 
 For example, `sciurus_0.1.0_linux_amd64.tar.gz` contains the executable and license
-files at its root. Each archive is extracted and its executable is run on the
-matching native runner, outside the source checkout. Smoke checks exercise the
-CLI, embedded editor assets and bundled examples.
+files at its root. Every archive is extracted and checked for its contents,
+binary target, embedded version string and disabled CGO. Linux executable smoke checks
+run outside the source checkout and exercise the CLI, embedded editor assets
+and bundled examples. macOS and Windows executables are not run in CI.
 
 `checksums.txt` lists SHA-256 hashes for all five archives. The published release
 includes generated notes listing merged PRs, contributors and a changelog link.

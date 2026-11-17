@@ -7,7 +7,7 @@ on:
   workflow_call:
     inputs:
       version:
-        description: Version embedded in native build artifacts.
+        description: Version embedded in release build artifacts.
         type: string
         default: dev
 
@@ -100,16 +100,16 @@ jobs:
     name: Reusable GitHub Action
     uses: ./.github/workflows/action-tests.yml
 
-  native-build:
-    name: Native release builds
-    uses: ./.github/workflows/native-builds.yml
+  release-build:
+    name: Release builds
+    uses: ./.github/workflows/release-builds.yml
     with:
       version: ${{ inputs.version || 'dev' }}
 
   checks:
     name: CI checks
     if: always()
-    needs: [lockfile, go, frontend, action, native-build]
+    needs: [lockfile, go, frontend, action, release-build]
     runs-on: ubuntu-26.04
     steps:
       - name: Require every test job to pass
@@ -118,7 +118,7 @@ jobs:
           GO_RESULT: ${{ needs.go.result }}
           FRONTEND_RESULT: ${{ needs.frontend.result }}
           ACTION_RESULT: ${{ needs.action.result }}
-          BUILD_RESULT: ${{ needs.native-build.result }}
+          BUILD_RESULT: ${{ needs.release-build.result }}
         run: |
           test "$LOCKFILE_RESULT" = success
           test "$GO_RESULT" = success
