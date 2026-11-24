@@ -3,7 +3,7 @@ module github.com/mhemmings/sciurus
 go 1.26.11
 
 require (
-	github.com/go-sql-driver/mysql v1.10.1
+	github.com/go-sql-driver/mysql v1.10.2
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/image v0.38.0
 	vitess.io/vitess v0.24.2
